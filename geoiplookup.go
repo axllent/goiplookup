@@ -96,15 +96,19 @@ func Lookup(lookup string) {
     }
 
     if ( *country || *iso ) {
-        if *iso {
+        if *iso && ciso != "" {
             output = append(output, ciso)
         }
-        if *country {
+        if *country && cname != "" {
             output = append(output, cname)
         }
         response = fmt.Sprintf(strings.Join(output, ", "))
     } else {
-        response = fmt.Sprintf("GeoIP Country Edition: %s, %s", ciso, cname)
+        if ciso == "" {
+            response = "GeoIP Country Edition: IP Address not found"
+        } else {
+            response = fmt.Sprintf("GeoIP Country Edition: %s, %s", ciso, cname)
+        }
     }
 
     fmt.Println(response)
