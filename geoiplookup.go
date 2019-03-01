@@ -69,7 +69,7 @@ func Lookup(lookup string) {
             mmdb = *data_dir
     }
 
-    Debug(fmt.Sprintf("Opening ", mmdb))
+    Debug(fmt.Sprintf("Opening %s", mmdb))
 
     db, err := geoip2.Open(mmdb)
     if err != nil {
