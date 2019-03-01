@@ -118,7 +118,7 @@ func Lookup(lookup string) {
  * Print the help function
  */
 var Usage = func() {
-    fmt.Fprintf(os.Stderr, "Usage: %s [-i|-c] <ipaddress>\n", os.Args[0])
+    fmt.Fprintf(os.Stderr, "Usage: %s [-i|-c] <ipaddress|hostname>\n", os.Args[0])
     flag.PrintDefaults()
 }
 
