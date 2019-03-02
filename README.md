@@ -20,9 +20,10 @@ It currently only supports the free GeoLite2-Country database, and there is no p
 Linux amd64 binaries are supplied with releases.
 
 ```
-bunzip goiplookup_linux_amd64.bz2
+bunzip2 goiplookup_linux_amd64.bz2
 chmod 755 goiplookup_linux_amd64
 sudo mv goiplookup_linux_amd64 /usr/local/bin/goiplookup
+sudo chown root:root /usr/local/bin/goiplookup
 ```
 
 If you with to replace an existing defunct implementation of geoiplookup, then simply name the file `geoiplookup`.
