@@ -16,24 +16,35 @@ import (
 	"strings"
 )
 
-// global flags
-var data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
-var country = flag.Bool("c", false, "return country name")
-var iso = flag.Bool("i", false, "return country iso code")
-var verbose_output = flag.Bool("v", false, "verbose/debug output")
+// Flags
+var (
+        data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
+        country = flag.Bool("c", false, "return country name")
+        iso = flag.Bool("i", false, "return country iso code")
+        showhelp = flag.Bool("h", false, "show help")
+        verbose_output = flag.Bool("v", false, "verbose/debug output")
+        showversion = flag.Bool("V", false, "show version number")
+        version = "dev"
+)
 
 // Update URL
 const update_url = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
 
 // Main function
 func main() {
-	showhelp := flag.Bool("h", false, "show help")
-	flag.Parse()
+
+        flag.Parse()
+
+        if *showversion {
+                fmt.Println(fmt.Sprintf("Version: %s", version))
+                os.Exit(1)
+        }
+
 
 	if len(flag.Args()) != 1 || *showhelp {
 		Usage()
 		os.Exit(1)
-	}
+        }
 
 	lookup := flag.Args()[0]
 
@@ -256,7 +267,7 @@ var Usage = func() {
         fmt.Fprintf(os.Stderr, "%s update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
 }
 
-// Display debug information `-v`
+// Display debug information with `-v`
 func Debug(m string) {
 	if *verbose_output {
 		fmt.Println(m)
