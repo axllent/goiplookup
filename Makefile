@@ -2,10 +2,10 @@
 GOPATH := ${PWD}
 export GOPATH
 
-geoiplookup: geoiplookup.go
+geoiplookup: goiplookup.go
 	go get github.com/oschwald/geoip2-golang
-	go build geoiplookup.go
-	strip geoiplookup
+	go build goiplookup.go
+	strip goiplookup
 
 clean:
-	rm -rf pkg src geoiplookup
+	rm -rf pkg src goiplookup

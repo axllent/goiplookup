@@ -17,14 +17,15 @@ import (
 )
 
 // global flags
-var verbose = flag.Bool("v", false, "verbose output")
+var data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
 var country = flag.Bool("c", false, "return country name")
 var iso = flag.Bool("i", false, "return country iso code")
-var data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
+var verbose_output = flag.Bool("v", false, "verbose/debug output")
 
-/**
- * Main function
- */
+// Update URL
+const update_url = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
+
+// Main function
 func main() {
 	showhelp := flag.Bool("h", false, "show help")
 	flag.Parse()
@@ -43,9 +44,7 @@ func main() {
 	}
 }
 
-/**
- * Lookup ip string
- */
+// Lookup ip or hostname
 func Lookup(lookup string) {
 
 	var ciso string
@@ -73,7 +72,7 @@ func Lookup(lookup string) {
 	}
 
 	switch mode := fi.Mode(); {
-	case mode.IsDir():
+	case mode.IsDir(): // if data_dir is dir, append GeoLite2-Country.mmdb
 		mmdb = path.Join(*data_dir, "GeoLite2-Country.mmdb")
 	case mode.IsRegular():
 		mmdb = *data_dir
@@ -124,8 +123,8 @@ func Lookup(lookup string) {
 	fmt.Println(response)
 }
 
+// Update GeoLite2-Country.mmdb
 func UpdateGeoLite2Country() {
-	url := "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
 
 	Debug("Updating GeoLite2-Country.mmdb")
 
@@ -140,7 +139,7 @@ func UpdateGeoLite2Country() {
 		os.Exit(1)
 	}
 
-	if err := DownloadFile("/tmp/GeoLite2-Country.tar.gz", url); err != nil {
+	if err := DownloadFile("/tmp/GeoLite2-Country.tar.gz", update_url); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -156,9 +155,12 @@ func UpdateGeoLite2Country() {
 	}
 }
 
+// Download a URL to a file
 func DownloadFile(filepath string, url string) error {
-	// Get the data
+
 	Debug(fmt.Sprintf("Downloading %s", url))
+
+	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -179,7 +181,9 @@ func DownloadFile(filepath string, url string) error {
 
 // Extract the database from the tar.gz
 func ExtractDatabase(dst string, targz string) error {
+
 	Debug(fmt.Sprintf("Opening %s", targz))
+
 	re, _ := regexp.Compile(`GeoLite2\-Country\.mmdb$`)
 
 	r, err := os.Open(targz)
@@ -199,15 +203,12 @@ func ExtractDatabase(dst string, targz string) error {
 		header, err := tr.Next()
 
 		switch {
-
 		// if no more files are found return
 		case err == io.EOF:
 			return nil
-
 		// return any other error
 		case err != nil:
 			return err
-
 		// if the header is nil, just skip it (not sure how this happens)
 		case header == nil:
 			continue
@@ -230,6 +231,7 @@ func ExtractDatabase(dst string, targz string) error {
 				}
 
 				Debug(fmt.Sprintf("Copy GeoLite2-Country.mmdb to %s", outfile))
+
 				if _, err := io.Copy(f, tr); err != nil {
 					return err
 				}
@@ -240,19 +242,23 @@ func ExtractDatabase(dst string, targz string) error {
 	}
 }
 
-/**
- * Print the help function
- */
+// Print the help function
 var Usage = func() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|update>\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|update>\n", os.Args[0])
+        fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
+        fmt.Println("\nOptions:")
 	flag.PrintDefaults()
+        fmt.Println("\nExamples:")
+        fmt.Fprintf(os.Stderr, "%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "%s -n 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "%s update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
 }
 
-/**
- * Return debug information `-v`
- */
+// Display debug information `-v`
 func Debug(m string) {
-	if *verbose {
+	if *verbose_output {
 		fmt.Println(m)
 	}
 }
