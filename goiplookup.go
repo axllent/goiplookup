@@ -48,7 +48,7 @@ func main() {
 
 	lookup := flag.Args()[0]
 
-	if lookup == "update" {
+	if lookup == "db-update" {
 		UpdateGeoLite2Country()
 	} else {
 		Lookup(lookup)
@@ -255,7 +255,7 @@ func ExtractDatabase(dst string, targz string) error {
 
 // Print the help function
 var Usage = func() {
-        fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|update>\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update>\n", os.Args[0])
         fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
         fmt.Println("\nOptions:")
 	flag.PrintDefaults()
@@ -263,8 +263,8 @@ var Usage = func() {
         fmt.Fprintf(os.Stderr, "%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
         fmt.Fprintf(os.Stderr, "%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
         fmt.Fprintf(os.Stderr, "%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
-        fmt.Fprintf(os.Stderr, "%s -n 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
-        fmt.Fprintf(os.Stderr, "%s update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
+        fmt.Fprintf(os.Stderr, "%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
 }
 
 // Display debug information with `-v`

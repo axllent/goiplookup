@@ -1,4 +1,4 @@
 /pkg/
 /src/
-geoiplookup
 goiplookup
+goiplookup*.bz2
