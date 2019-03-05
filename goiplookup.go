@@ -1,50 +1,47 @@
 package main
 
 import (
-	"archive/tar"
-	"compress/gzip"
 	"flag"
 	"fmt"
 	"github.com/oschwald/geoip2-golang"
-	"io"
 	"net"
-	"net/http"
 	"os"
 	"path"
-	"path/filepath"
-	"regexp"
 	"strings"
 )
 
 // Flags
 var (
-        data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
-        country = flag.Bool("c", false, "return country name")
-        iso = flag.Bool("i", false, "return country iso code")
-        showhelp = flag.Bool("h", false, "show help")
-        verbose_output = flag.Bool("v", false, "verbose/debug output")
-        showversion = flag.Bool("V", false, "show version number")
-        version = "dev"
+	data_dir       = flag.String("d", "/usr/share/GeoIP", "database directory or file")
+	country        = flag.Bool("c", false, "return country name")
+	iso            = flag.Bool("i", false, "return country iso code")
+	showhelp       = flag.Bool("h", false, "show help")
+	verbose_output = flag.Bool("v", false, "verbose/debug output")
+	showversion    = flag.Bool("V", false, "show version number")
+	version        = "dev"
 )
 
-// Update URL
-const update_url = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
+// URLs
+const (
+	db_update_url = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
+	repo_url      = "https://github.com/axllent/goiplookup/releases"
+	version_url   = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
+)
 
 // Main function
 func main() {
 
-        flag.Parse()
+	flag.Parse()
 
-        if *showversion {
-                fmt.Println(fmt.Sprintf("Version: %s", version))
-                os.Exit(1)
-        }
-
+	if *showversion {
+		fmt.Println(fmt.Sprintf("Version: %s", version))
+		os.Exit(1)
+	}
 
 	if len(flag.Args()) != 1 || *showhelp {
 		Usage()
 		os.Exit(1)
-        }
+	}
 
 	lookup := flag.Args()[0]
 
@@ -134,137 +131,18 @@ func Lookup(lookup string) {
 	fmt.Println(response)
 }
 
-// Update GeoLite2-Country.mmdb
-func UpdateGeoLite2Country() {
-
-	Debug("Updating GeoLite2-Country.mmdb")
-
-	// check the output directory is writeable
-	if _, err := os.Stat(*data_dir); os.IsNotExist(err) {
-		os.MkdirAll(*data_dir, os.ModePerm)
-	}
-
-	_, err := os.Stat(*data_dir)
-	if err != nil {
-		fmt.Println("Error: Cannot create", *data_dir)
-		os.Exit(1)
-	}
-
-	if err := DownloadFile("/tmp/GeoLite2-Country.tar.gz", update_url); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if err := ExtractDatabase(*data_dir, "/tmp/GeoLite2-Country.tar.gz"); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if err := os.Remove("/tmp/GeoLite2-Country.tar.gz"); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
-
-// Download a URL to a file
-func DownloadFile(filepath string, url string) error {
-
-	Debug(fmt.Sprintf("Downloading %s", url))
-
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	// Create the file
-	out, err := os.Create(filepath)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	// Write the body to file
-	_, err = io.Copy(out, resp.Body)
-	return err
-}
-
-// Extract the database from the tar.gz
-func ExtractDatabase(dst string, targz string) error {
-
-	Debug(fmt.Sprintf("Opening %s", targz))
-
-	re, _ := regexp.Compile(`GeoLite2\-Country\.mmdb$`)
-
-	r, err := os.Open(targz)
-	if err != nil {
-		return err
-	}
-
-	gzr, err := gzip.NewReader(r)
-	if err != nil {
-		return err
-	}
-	defer gzr.Close()
-
-	tr := tar.NewReader(gzr)
-
-	for {
-		header, err := tr.Next()
-
-		switch {
-		// if no more files are found return
-		case err == io.EOF:
-			return nil
-		// return any other error
-		case err != nil:
-			return err
-		// if the header is nil, just skip it (not sure how this happens)
-		case header == nil:
-			continue
-		}
-
-		// the target location where the dir/file should be created
-		target := filepath.Join(dst, header.Name)
-
-		// check the file type
-		switch header.Typeflag {
-
-		case tar.TypeReg:
-
-			if re.Match([]byte(target)) {
-				outfile := filepath.Join(dst, "GeoLite2-Country.mmdb")
-
-				f, err := os.OpenFile(outfile, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
-				if err != nil {
-					return err
-				}
-
-				Debug(fmt.Sprintf("Copy GeoLite2-Country.mmdb to %s", outfile))
-
-				if _, err := io.Copy(f, tr); err != nil {
-					return err
-				}
-
-				f.Close()
-			}
-		}
-	}
-}
-
 // Print the help function
 var Usage = func() {
-        fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update>\n", os.Args[0])
-        fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
-        fmt.Println("\nOptions:")
+	fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update>\n", os.Args[0])
+	fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
+	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
-        fmt.Println("\nExamples:")
-        fmt.Fprintf(os.Stderr, "%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
-        fmt.Fprintf(os.Stderr, "%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
-        fmt.Fprintf(os.Stderr, "%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
-        fmt.Fprintf(os.Stderr, "%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
-        fmt.Fprintf(os.Stderr, "%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
+	fmt.Println("\nExamples:")
+	fmt.Fprintf(os.Stderr, "%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
 }
 
 // Display debug information with `-v`
