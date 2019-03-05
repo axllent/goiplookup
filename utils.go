@@ -129,3 +129,15 @@ func ExtractDatabase(dst string, targz string) error {
 		}
 	}
 }
+
+
+func GetLatestRelease() {
+
+}
+
+// Display debug information with `-v`
+func Debug(m string) {
+	if *verbose_output {
+		fmt.Println(m)
+	}
+}

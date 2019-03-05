@@ -144,10 +144,3 @@ var Usage = func() {
 	fmt.Fprintf(os.Stderr, "%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
 	fmt.Fprintf(os.Stderr, "%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
 }
-
-// Display debug information with `-v`
-func Debug(m string) {
-	if *verbose_output {
-		fmt.Println(m)
-	}
-}
