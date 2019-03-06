@@ -1,6 +1,6 @@
-# GoIpLookup - geoiplookup for GeoLite2-Country written in Go
+# GoipLookup - geoiplookup for GeoLite2 written in Go
 
-GoIpLookup is a geoiplookup replacement for the [free GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
+GoipLookup is a geoiplookup replacement for the [free GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
 written in [Go](https://golang.org/).
 
 It currently only supports the free GeoLite2-Country database, and there is no planned support for the other types.
