@@ -231,14 +231,14 @@ func ReplaceFile(dst string, src string) error {
 	}
 
 	// rename the current executable to <binary>.old
-	Verbose(fmt.Sprintf("Renaming %s to %s", dst, dst_old))
-	if err := os.Rename(dst, dst_old); err != nil {
+	Verbose(fmt.Sprintf("Renaming %s to %s", dst, old_tmp_abs))
+	if err := os.Rename(dst, old_tmp_abs); err != nil {
 		return err
 	}
 
 	// rename the <binary>.new to current executable
-	Verbose(fmt.Sprintf("Renaming %s to %s", new_tmp_abs, binary_filename))
-	if err := os.Rename(new_tmp_abs, binary_filename); err != nil {
+	Verbose(fmt.Sprintf("Renaming %s to %s", new_tmp_abs, dst))
+	if err := os.Rename(new_tmp_abs, dst); err != nil {
 		return err
 	}
 

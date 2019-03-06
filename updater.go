@@ -13,12 +13,10 @@ import (
 
 // Update GeoLite2-Country.mmdb
 func UpdateGeoLite2Country() {
-        Verbose("Updating GeoLite2-Country.mmdb")
+	Verbose("Updating GeoLite2-Country.mmdb")
 
-        tmp_dir := os.TempDir()
-        gzfile := filepath.Join(tmp_dir, "GeoLite2-Country.tar.gz")
-
-
+	tmp_dir := os.TempDir()
+	gzfile := filepath.Join(tmp_dir, "GeoLite2-Country.tar.gz")
 
 	// check the output directory is writeable
 	if _, err := os.Stat(*data_dir); os.IsNotExist(err) {
@@ -48,7 +46,7 @@ func UpdateGeoLite2Country() {
 
 // Extract just the GeoLite2-Country.mmdb from the tar.gz
 func ExtractDatabaseFile(dst string, targz string) error {
-        Verbose(fmt.Sprintf("Opening %s", targz))
+	Verbose(fmt.Sprintf("Opening %s", targz))
 
 	re, _ := regexp.Compile(`GeoLite2\-Country\.mmdb$`)
 
@@ -110,9 +108,9 @@ func ExtractDatabaseFile(dst string, targz string) error {
 
 // Built-in updater
 func SelfUpdate() {
-        tmp_dir := os.TempDir()
+	tmp_dir := os.TempDir()
 	bz2file := filepath.Join(tmp_dir, "goiplookup.bz2")
-	binfile := filepath.Join(tmp_dir, "goiplookup.tmp")
+        newexec := filepath.Join(tmp_dir, "goiplookup.tmp")
 
 	download_url, err := GetUpdateURL()
 	if err != nil {
@@ -137,13 +135,13 @@ func SelfUpdate() {
 	br := bzip2.NewReader(f)
 
 	// write the file
-	out, err := os.OpenFile(binfile, os.O_CREATE|os.O_RDWR, 0755)
+	out, err := os.OpenFile(newexec, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)
 	}
 
-	Verbose(fmt.Sprintf("Extracting %s", binfile))
+	Verbose(fmt.Sprintf("Extracting %s", newexec))
 
 	_, err = io.Copy(out, br)
 	if err != nil {
@@ -153,7 +151,10 @@ func SelfUpdate() {
 
 	// replace os.Args[0] with new file
 	// cannot overwrite open file so rename then delete
-	err = ReplaceFile(os.Args[0], binfile)
+        // get executable's absolute path
+        oldexec, _ := os.Readlink("/proc/self/exe")
+
+        err = ReplaceFile(oldexec, newexec)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)

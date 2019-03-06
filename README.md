@@ -1,6 +1,6 @@
-# GoIpLookup - geoiplookup for GeoLite2-Country written in Go
+# GoipLookup - geoiplookup for GeoLite2 written in Go
 
-GoIpLookup is a geoiplookup replacement for the [free GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
+GoipLookup is a geoiplookup replacement for the [free GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
 written in [Go](https://golang.org/).
 
 It currently only supports the free GeoLite2-Country database, and there is no planned support for the other types.
@@ -8,26 +8,28 @@ It currently only supports the free GeoLite2-Country database, and there is no p
 
 ## Features
 
-- Drop-in replacement for the now defunt geoiplookup utility
+- Drop-in replacement for the now defunt `geoiplookup` utility, simply rename it
 - Works with the current Maxmind database format (mmdd)
 - IPv4, IPv6 and fully qualified domain name (FQDN) support
 - Options to return just the country iso (`NZ`) or country name (`New Zealand`), rather than the full `GeoIP Country Edition: NZ, New Zealand`
 - Built-in database update support
-- Built-in self updater (if new version if available)
+- Built-in self updater (if new release is available)
 
 
 ## Installing
 
-Linux amd64 binaries are supplied with releases.
+Multiple OS/Architecture binaries are supplied with releases. Extract the binary, make it executable, and move it to a location such as `/usr/local/bin`.
+
+If you wish to replace an existing defunct implementation of geoiplookup, then simply name the file `geoiplookup`.
+
+
+## Updating
+
+GoipLookup comes with a built-in self-updater:
 
 ```
-bunzip2 goiplookup_linux_amd64.bz2
-chmod 755 goiplookup_linux_amd64
-sudo mv goiplookup_linux_amd64 /usr/local/bin/goiplookup
-sudo chown root:root /usr/local/bin/goiplookup
+goiplookup self-update
 ```
-
-If you with to replace an existing defunct implementation of geoiplookup, then simply name the file `geoiplookup`.
 
 
 ## Compiling from source
@@ -40,9 +42,11 @@ cd goiplookup
 make
 ```
 
+
 ## Basic usage
+
 ```
-Usage: goiplookup [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update>
+Usage: goiplookup [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>
 
 Options:
   -V	show version number
