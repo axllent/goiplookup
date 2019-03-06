@@ -4,6 +4,8 @@
 
 - Split project into multiple files
 - Add self-updater, `-v` will return current version plus latest if there is an update
+- Support for darwin (Mac)
+- Release multiple OS binaries
 
 
 ## [0.0.2]
@@ -14,7 +16,7 @@
 
 ## [0.0.1]
 
-- Rename to goiplookup ([`3f213b0`](https://github.com/axllent/goiplookup/commit/3f213b09532d5bfa3f69cb091bd129200d4cef9d))
+- Rename to goiplookup
 - Add database update functionality
 - Tidy code and basic versioning
 - Return IP Address not found
