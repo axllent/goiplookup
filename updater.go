@@ -110,7 +110,7 @@ func ExtractDatabaseFile(dst string, targz string) error {
 func SelfUpdate() {
 	tmp_dir := os.TempDir()
 	bz2file := filepath.Join(tmp_dir, "goiplookup.bz2")
-	binfile := filepath.Join(tmp_dir, "goiplookup.tmp")
+        newexec := filepath.Join(tmp_dir, "goiplookup.tmp")
 
 	download_url, err := GetUpdateURL()
 	if err != nil {
@@ -135,13 +135,13 @@ func SelfUpdate() {
 	br := bzip2.NewReader(f)
 
 	// write the file
-	out, err := os.OpenFile(binfile, os.O_CREATE|os.O_RDWR, 0755)
+	out, err := os.OpenFile(newexec, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)
 	}
 
-	Verbose(fmt.Sprintf("Extracting %s", binfile))
+	Verbose(fmt.Sprintf("Extracting %s", newexec))
 
 	_, err = io.Copy(out, br)
 	if err != nil {
@@ -151,7 +151,10 @@ func SelfUpdate() {
 
 	// replace os.Args[0] with new file
 	// cannot overwrite open file so rename then delete
-	err = ReplaceFile(os.Args[0], binfile)
+        // get executable's absolute path
+        oldexec, _ := os.Readlink("/proc/self/exe")
+
+        err = ReplaceFile(oldexec, newexec)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)
