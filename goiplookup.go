@@ -23,7 +23,6 @@ var data_dir (*string)
 // URLs
 const (
 	db_update_url = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
-	repo_url      = "https://github.com/axllent/goiplookup/releases"
 	release_url   = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
 )
 
@@ -34,9 +33,9 @@ func main() {
 		data_dir = flag.String("d", "/usr/local/share/GeoIP", "database directory or file")
 	} else {
 		data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
-        }
+	}
 
-        // parse flags
+	// parse flags
 	flag.Parse()
 
 	if *showversion {

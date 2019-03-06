@@ -13,12 +13,10 @@ import (
 
 // Update GeoLite2-Country.mmdb
 func UpdateGeoLite2Country() {
-        Verbose("Updating GeoLite2-Country.mmdb")
+	Verbose("Updating GeoLite2-Country.mmdb")
 
-        tmp_dir := os.TempDir()
-        gzfile := filepath.Join(tmp_dir, "GeoLite2-Country.tar.gz")
-
-
+	tmp_dir := os.TempDir()
+	gzfile := filepath.Join(tmp_dir, "GeoLite2-Country.tar.gz")
 
 	// check the output directory is writeable
 	if _, err := os.Stat(*data_dir); os.IsNotExist(err) {
@@ -48,7 +46,7 @@ func UpdateGeoLite2Country() {
 
 // Extract just the GeoLite2-Country.mmdb from the tar.gz
 func ExtractDatabaseFile(dst string, targz string) error {
-        Verbose(fmt.Sprintf("Opening %s", targz))
+	Verbose(fmt.Sprintf("Opening %s", targz))
 
 	re, _ := regexp.Compile(`GeoLite2\-Country\.mmdb$`)
 
@@ -110,7 +108,7 @@ func ExtractDatabaseFile(dst string, targz string) error {
 
 // Built-in updater
 func SelfUpdate() {
-        tmp_dir := os.TempDir()
+	tmp_dir := os.TempDir()
 	bz2file := filepath.Join(tmp_dir, "goiplookup.bz2")
 	binfile := filepath.Join(tmp_dir, "goiplookup.tmp")
 
