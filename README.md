@@ -11,8 +11,9 @@ It currently only supports the free GeoLite2-Country database, and there is no p
 - Drop-in replacement for the now defunt geoiplookup utility
 - Works with the current Maxmind database format (mmdd)
 - IPv4, IPv6 and fully qualified domain name (FQDN) support
-- Built-in database update support
 - Options to return just the country iso (`NZ`) or country name (`New Zealand`), rather than the full `GeoIP Country Edition: NZ, New Zealand`
+- Built-in database update support
+- Built-in self updater (if new version if available)
 
 
 ## Installing
@@ -53,9 +54,10 @@ Options:
   -v	verbose/debug output
 
 Examples:
-./goiplookup 8.8.8.8			Return the country ISO code and name
-./goiplookup -d ~/GeoIP 8.8.8.8		Use a different database directory
-./goiplookup -i 8.8.8.8			Return just the country ISO code
-./goiplookup -c 8.8.8.8			Return just the country name
-./goiplookup db-update			Update the GeoLite2-Country database (do not run more than once a month)
+goiplookup 8.8.8.8			Return the country ISO code and name
+goiplookup -d ~/GeoIP 8.8.8.8		Use a different database directory
+goiplookup -i 8.8.8.8			Return just the country ISO code
+goiplookup -c 8.8.8.8			Return just the country name
+goiplookup db-update			Update the GeoLite2-Country database (do not run more than once a month)
+goiplookup self-update			Update the GoIpLookup binary with the latest release
 ```

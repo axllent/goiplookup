@@ -6,7 +6,7 @@ LDFLAGS=-ldflags "-X main.version=${VERSION}"
 
 geoiplookup: goiplookup.go
 	go get github.com/oschwald/geoip2-golang
-	go build ${LDFLAGS} goiplookup.go
+	go build ${LDFLAGS}
 	strip goiplookup
 
 clean:
