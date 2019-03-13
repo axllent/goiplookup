@@ -2,12 +2,11 @@
 GOPATH := ${PWD}
 export GOPATH
 VERSION=`git describe --tags`
-LDFLAGS=-ldflags "-X main.version=${VERSION}"
+LDFLAGS=-ldflags "-s -w -X main.version=${VERSION}"
 
 geoiplookup: goiplookup.go
 	go get github.com/oschwald/geoip2-golang
 	go build ${LDFLAGS}
-	strip goiplookup
 
 clean:
 	rm -rf pkg src goiplookup
