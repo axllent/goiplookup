@@ -175,7 +175,7 @@ func GetUpdateURL() (string, error) {
 
 	Verbose(fmt.Sprintf("Latest release is %s", result.TagName))
 	if version == result.TagName {
-		return "", fmt.Errorf("You already have the latest version: %s", version)
+		return "", fmt.Errorf("You already have the latest version (%s)", version)
 	}
 
 	link_os := runtime.GOOS

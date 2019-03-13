@@ -1,5 +1,11 @@
 # Changelog
 
+## [development]
+
+- Better version feedback and update information
+- Strip binaries with `-ldflags "-s -w"`
+
+
 ## [0.0.4]
 
 - Fix bug whereby executable path wasn't detected on `self-update`

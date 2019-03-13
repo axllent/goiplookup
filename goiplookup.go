@@ -39,10 +39,15 @@ func main() {
 	flag.Parse()
 
 	if *showversion {
-		fmt.Println(fmt.Sprintf("Current: %s", version))
+		fmt.Println(fmt.Sprintf("Version %s", version))
 		latest, err := LatestRelease()
 		if err == nil && version != latest {
-			fmt.Println(fmt.Sprintf("Latest:  %s", latest))
+                        fmt.Println(fmt.Sprintf("Version %s available", latest))
+                        if _, err := GetUpdateURL(); err == nil {
+                                fmt.Println(fmt.Sprintf("Run `%s self-update` to update", os.Args[0]))
+                        }
+		} else {
+			fmt.Println("You have the latest version")
 		}
 		return
 	}
