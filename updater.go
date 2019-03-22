@@ -110,9 +110,10 @@ func ExtractDatabaseFile(dst string, targz string) error {
 func SelfUpdate() {
 	tmp_dir := os.TempDir()
 	bz2file := filepath.Join(tmp_dir, "goiplookup.bz2")
-        newexec := filepath.Join(tmp_dir, "goiplookup.tmp")
+	newexec := filepath.Join(tmp_dir, "goiplookup.tmp")
 
 	download_url, err := GetUpdateURL()
+	fmt.Println(fmt.Sprintf("Updating %s", os.Args[0]))
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)
@@ -151,12 +152,13 @@ func SelfUpdate() {
 
 	// replace os.Args[0] with new file
 	// cannot overwrite open file so rename then delete
-        // get executable's absolute path
-        oldexec, _ := os.Readlink("/proc/self/exe")
+	// get executable's absolute path
+	oldexec, _ := os.Readlink("/proc/self/exe")
 
-        err = ReplaceFile(oldexec, newexec)
+	err = ReplaceFile(oldexec, newexec)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
+		fmt.Println("You may require root permissions.")
 		os.Exit(1)
 	}
 
@@ -166,4 +168,6 @@ func SelfUpdate() {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)
 	}
+
+	fmt.Println("Done")
 }
