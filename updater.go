@@ -11,29 +11,29 @@ import (
 	"regexp"
 )
 
-// Update GeoLite2-Country.mmdb
+// UpdateGeoLite2Country updates GeoLite2-Country.mmdb
 func UpdateGeoLite2Country() {
 	Verbose("Updating GeoLite2-Country.mmdb")
 
-	tmp_dir := os.TempDir()
-	gzfile := filepath.Join(tmp_dir, "GeoLite2-Country.tar.gz")
+	tmpDir := os.TempDir()
+	gzfile := filepath.Join(tmpDir, "GeoLite2-Country.tar.gz")
 
 	// check the output directory is writeable
-	if _, err := os.Stat(*data_dir); os.IsNotExist(err) {
-		os.MkdirAll(*data_dir, os.ModePerm)
+	if _, err := os.Stat(*dataDir); os.IsNotExist(err) {
+		os.MkdirAll(*dataDir, os.ModePerm)
 	}
 
-	if _, err := os.Stat(*data_dir); err != nil {
-		fmt.Println("Error: Cannot create", *data_dir)
+	if _, err := os.Stat(*dataDir); err != nil {
+		fmt.Println("Error: Cannot create", *dataDir)
 		os.Exit(1)
 	}
 
-	if err := DownloadToFile(gzfile, db_update_url); err != nil {
+	if err := DownloadToFile(gzfile, dbUpdateURL); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := ExtractDatabaseFile(*data_dir, gzfile); err != nil {
+	if err := ExtractDatabaseFile(*dataDir, gzfile); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -44,7 +44,7 @@ func UpdateGeoLite2Country() {
 	}
 }
 
-// Extract just the GeoLite2-Country.mmdb from the tar.gz
+// ExtractDatabaseFile extracts just the GeoLite2-Country.mmdb from the tar.gz
 func ExtractDatabaseFile(dst string, targz string) error {
 	Verbose(fmt.Sprintf("Opening %s", targz))
 
@@ -106,20 +106,20 @@ func ExtractDatabaseFile(dst string, targz string) error {
 	}
 }
 
-// Built-in updater
+// SelfUpdate is a built-in updater
 func SelfUpdate() {
-	tmp_dir := os.TempDir()
-	bz2file := filepath.Join(tmp_dir, "goiplookup.bz2")
-	newexec := filepath.Join(tmp_dir, "goiplookup.tmp")
+	tmpDir := os.TempDir()
+	bz2file := filepath.Join(tmpDir, "goiplookup.bz2")
+	newexec := filepath.Join(tmpDir, "goiplookup.tmp")
 
-	download_url, err := GetUpdateURL()
+	downloadURL, err := GetUpdateURL()
 	fmt.Println(fmt.Sprintf("Updating %s", os.Args[0]))
 	if err != nil {
 		fmt.Println(fmt.Sprintf("Error: %s", err))
 		os.Exit(1)
 	}
 
-	if err := DownloadToFile(bz2file, download_url); err != nil {
+	if err := DownloadToFile(bz2file, downloadURL); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}

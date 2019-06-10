@@ -1,6 +1,12 @@
 # Changelog
 
-## [development]
+## [0.1.0]
+
+- Add corruption check for downloaded databases before overwriting
+- Code cleanup
+
+
+## [0.0.5]
 
 - Better version feedback and update information
 - Strip binaries with `-ldflags "-s -w"`
