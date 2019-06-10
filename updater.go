@@ -6,9 +6,13 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/oschwald/geoip2-golang"
 )
 
 // UpdateGeoLite2Country updates GeoLite2-Country.mmdb
@@ -87,20 +91,37 @@ func ExtractDatabaseFile(dst string, targz string) error {
 		case tar.TypeReg:
 
 			if re.Match([]byte(target)) {
-				outfile := filepath.Join(dst, "GeoLite2-Country.mmdb")
+				outFile := filepath.Join(dst, "GeoLite2-Country.mmdb")
 
-				f, err := os.OpenFile(outfile, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+				// tmpFile is used to first ensure the extracted database is valid before replacing the previous one
+				tmpFile, err := ioutil.TempFile("", "testDBFile")
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer os.Remove(tmpFile.Name()) // clean up
+
+				Verbose(fmt.Sprintf("Copy GeoLite2-Country.mmdb to %s for testing", tmpFile.Name()))
+				if _, err := io.Copy(tmpFile, tr); err != nil {
+					return err
+				}
+
+				db, err := geoip2.Open(tmpFile.Name())
+				if err != nil {
+					return fmt.Errorf("Downloaded GeoLite2-Country.mmdb database (%s) corrupt, aborting updating", tmpFile.Name())
+				}
+				db.Close()
+
+				Verbose(fmt.Sprintf("Copy %s to %s", tmpFile.Name(), outFile))
+
+				input, err := ioutil.ReadFile(tmpFile.Name())
 				if err != nil {
 					return err
 				}
 
-				Verbose(fmt.Sprintf("Copy GeoLite2-Country.mmdb to %s", outfile))
-
-				if _, err := io.Copy(f, tr); err != nil {
+				err = ioutil.WriteFile(outFile, input, 0644)
+				if err != nil {
 					return err
 				}
-
-				f.Close()
 			}
 		}
 	}
