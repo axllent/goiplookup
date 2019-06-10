@@ -1,6 +1,4 @@
 
-GOPATH := ${PWD}
-export GOPATH
 TAG=`git describe --tags`
 VERSION ?= `git describe --tags`
 LDFLAGS=-ldflags "-s -extldflags \"--static\" -w -X main.version=${VERSION}"

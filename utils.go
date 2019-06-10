@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/oschwald/geoip2-golang"
 	"io"
 	"io/ioutil"
 	"net"
@@ -13,9 +12,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/oschwald/geoip2-golang"
 )
 
-// Github release json struct
+// Repository Struct for Github release json
 type Repository struct {
 	Assets []struct {
 		BrowserDownloadURL string `json:"browser_download_url"`
@@ -51,17 +52,17 @@ func Lookup(lookup string) {
 		os.Exit(1)
 	}
 
-	fi, err := os.Stat(*data_dir)
+	fi, err := os.Stat(*dataDir)
 	if err != nil {
-		fmt.Println("Error: Directory does not exist", *data_dir)
+		fmt.Println("Error: Directory does not exist", *dataDir)
 		os.Exit(1)
 	}
 
 	switch mode := fi.Mode(); {
-	case mode.IsDir(): // if data_dir is dir, append GeoLite2-Country.mmdb
-		mmdb = path.Join(*data_dir, "GeoLite2-Country.mmdb")
+	case mode.IsDir(): // if dataDir is dir, append GeoLite2-Country.mmdb
+		mmdb = path.Join(*dataDir, "GeoLite2-Country.mmdb")
 	case mode.IsRegular():
-		mmdb = *data_dir
+		mmdb = *dataDir
 	}
 
 	Verbose(fmt.Sprintf("Opening %s", mmdb))
@@ -109,7 +110,7 @@ func Lookup(lookup string) {
 	fmt.Println(response)
 }
 
-// Download a URL to a file
+// DownloadToFile downloads a URL to a file
 func DownloadToFile(filepath string, url string) error {
 
 	Verbose(fmt.Sprintf("Downloading %s", url))
@@ -133,9 +134,9 @@ func DownloadToFile(filepath string, url string) error {
 	return err
 }
 
-// Fetch the latest release
+// LatestRelease fetches the latest release
 func LatestRelease() (string, error) {
-	resp, err := http.Get(release_url)
+	resp, err := http.Get(releaseURL)
 	if err != nil {
 		return "", err
 	}
@@ -154,10 +155,10 @@ func LatestRelease() (string, error) {
 	return result.TagName, nil
 }
 
-// Return a download URL based on OS & architecture
+// GetUpdateURL returns a download URL based on OS & architecture
 func GetUpdateURL() (string, error) {
-	Verbose(fmt.Sprintf("Fetching %s", release_url))
-	resp, err := http.Get(release_url)
+	Verbose(fmt.Sprintf("Fetching %s", releaseURL))
+	resp, err := http.Get(releaseURL)
 	if err != nil {
 		return "", err
 	}
@@ -178,23 +179,23 @@ func GetUpdateURL() (string, error) {
 		return "", fmt.Errorf("You already have the latest version (%s)", version)
 	}
 
-	link_os := runtime.GOOS
-	link_arch := runtime.GOARCH
-	release_name := fmt.Sprintf("goiplookup_%s_%s_%s.bz2", result.TagName, link_os, link_arch)
+	linkOS := runtime.GOOS
+	linkArch := runtime.GOARCH
+	releaseName := fmt.Sprintf("goiplookup_%s_%s_%s.bz2", result.TagName, linkOS, linkArch)
 
-	Verbose(fmt.Sprintf("Searching %s", release_name))
+	Verbose(fmt.Sprintf("Searching %s", releaseName))
 
 	for _, v := range result.Assets {
-		if v.Name == release_name {
+		if v.Name == releaseName {
 			Verbose(fmt.Sprintf("Found download URL %s", v.BrowserDownloadURL))
 			return v.BrowserDownloadURL, nil
 		}
 	}
 
-	return "", fmt.Errorf("No downlodable update found for %s", release_name) // nothing found
+	return "", fmt.Errorf("No downlodable update found for %s", releaseName) // nothing found
 }
 
-// Replace one file with another
+// ReplaceFile replaces one file with another
 func ReplaceFile(dst string, src string) error {
 	// open the source file for reading
 	Verbose(fmt.Sprintf("Opening %s", src))
@@ -205,46 +206,46 @@ func ReplaceFile(dst string, src string) error {
 	defer source.Close()
 
 	// destination directory eg: /usr/local/bin
-	dst_dir := filepath.Dir(dst)
+	dstDir := filepath.Dir(dst)
 	// binary filename eg: goiplookup
-	binary_filename := filepath.Base(dst)
+	binaryFilename := filepath.Base(dst)
 	// old tmp file name
-	dst_old := fmt.Sprintf("%s.old", binary_filename)
+	dstOld := fmt.Sprintf("%s.old", binaryFilename)
 	// new tmp file name
-	dst_new := fmt.Sprintf("%s.new", binary_filename)
+	dstNew := fmt.Sprintf("%s.new", binaryFilename)
 	// absolute path of new tmp file
-	new_tmp_abs := filepath.Join(dst_dir, dst_new)
+	newTmpAbs := filepath.Join(dstDir, dstNew)
 	// absolute path of old tmp file
-	old_tmp_abs := filepath.Join(dst_dir, dst_old)
+	oldTmpAbs := filepath.Join(dstDir, dstOld)
 
 	// create the new file
-	tmp_new, err := os.OpenFile(new_tmp_abs, os.O_CREATE|os.O_RDWR, 0755)
+	tmpNew, err := os.OpenFile(newTmpAbs, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
 		return err
 	}
-	defer tmp_new.Close()
+	defer tmpNew.Close()
 
 	// copy new binary to <binary>.new
-	Verbose(fmt.Sprintf("Copying %s to %s", src, new_tmp_abs))
-	if _, err := io.Copy(tmp_new, source); err != nil {
+	Verbose(fmt.Sprintf("Copying %s to %s", src, newTmpAbs))
+	if _, err := io.Copy(tmpNew, source); err != nil {
 		return err
 	}
 
 	// rename the current executable to <binary>.old
-	Verbose(fmt.Sprintf("Renaming %s to %s", dst, old_tmp_abs))
-	if err := os.Rename(dst, old_tmp_abs); err != nil {
+	Verbose(fmt.Sprintf("Renaming %s to %s", dst, oldTmpAbs))
+	if err := os.Rename(dst, oldTmpAbs); err != nil {
 		return err
 	}
 
 	// rename the <binary>.new to current executable
-	Verbose(fmt.Sprintf("Renaming %s to %s", new_tmp_abs, dst))
-	if err := os.Rename(new_tmp_abs, dst); err != nil {
+	Verbose(fmt.Sprintf("Renaming %s to %s", newTmpAbs, dst))
+	if err := os.Rename(newTmpAbs, dst); err != nil {
 		return err
 	}
 
 	// delete the old binary
-	Verbose(fmt.Sprintf("Deleting %s", old_tmp_abs))
-	if err := os.Remove(old_tmp_abs); err != nil {
+	Verbose(fmt.Sprintf("Deleting %s", oldTmpAbs))
+	if err := os.Remove(oldTmpAbs); err != nil {
 		return err
 	}
 
@@ -257,9 +258,9 @@ func ReplaceFile(dst string, src string) error {
 	return nil
 }
 
-// Display debug information with `-v`
+// Verbose displays debug information with `-v`
 func Verbose(m string) {
-	if *verbose_output {
+	if *verboseoutput {
 		fmt.Println(m)
 	}
 }

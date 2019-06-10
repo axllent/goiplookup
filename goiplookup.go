@@ -9,30 +9,30 @@ import (
 
 // Flags
 var (
-	country        = flag.Bool("c", false, "return country name")
-	iso            = flag.Bool("i", false, "return country iso code")
-	showhelp       = flag.Bool("h", false, "show help")
-	verbose_output = flag.Bool("v", false, "verbose/debug output")
-	showversion    = flag.Bool("V", false, "show version number")
-	version        = "dev"
+	country       = flag.Bool("c", false, "return country name")
+	iso           = flag.Bool("i", false, "return country iso code")
+	showhelp      = flag.Bool("h", false, "show help")
+	verboseoutput = flag.Bool("v", false, "verbose/debug output")
+	showversion   = flag.Bool("V", false, "show version number")
+	version       = "dev"
 )
 
 // we set this in `main()` based on OS
-var data_dir (*string)
+var dataDir (*string)
 
 // URLs
 const (
-	db_update_url = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
-	release_url   = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
+	dbUpdateURL = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
+	releaseURL  = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
 )
 
 // Main function
 func main() {
 	// alternate default path for OSX
 	if runtime.GOOS == "darwin" {
-		data_dir = flag.String("d", "/usr/local/share/GeoIP", "database directory or file")
+		dataDir = flag.String("d", "/usr/local/share/GeoIP", "database directory or file")
 	} else {
-		data_dir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
+		dataDir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
 	}
 
 	// parse flags
@@ -42,10 +42,10 @@ func main() {
 		fmt.Println(fmt.Sprintf("Version %s", version))
 		latest, err := LatestRelease()
 		if err == nil && version != latest {
-                        fmt.Println(fmt.Sprintf("Version %s available", latest))
-                        if _, err := GetUpdateURL(); err == nil {
-                                fmt.Println(fmt.Sprintf("Run `%s self-update` to update", os.Args[0]))
-                        }
+			fmt.Println(fmt.Sprintf("Version %s available", latest))
+			if _, err := GetUpdateURL(); err == nil {
+				fmt.Println(fmt.Sprintf("Run `%s self-update` to update", os.Args[0]))
+			}
 		} else {
 			fmt.Println("You have the latest version")
 		}
@@ -71,7 +71,7 @@ func main() {
 	}
 }
 
-// Print the help function
+// ShowUsage prints the help function
 var ShowUsage = func() {
 	fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>\n", os.Args[0])
 	fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
