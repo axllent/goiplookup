@@ -1,5 +1,10 @@
 # Changelog
 
+## [dev]
+
+- Switch to go modules
+
+
 ## [0.1.0]
 
 - Add corruption check for downloaded databases before overwriting
