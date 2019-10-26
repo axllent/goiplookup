@@ -34,12 +34,10 @@ goiplookup self-update
 
 ## Compiling from source
 
-You must have golang (>= 1.13) installed:
+Go >= 1.11 required:
 
 ```
 go get github.com:axllent/goiplookup.git
-cd goiplookup
-make
 ```
 
 ## Basic usage
