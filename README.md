@@ -1,5 +1,7 @@
 # GoipLookup - geoiplookup for GeoLite2 written in Go
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/axllent/goiplookup)](https://goreportcard.com/report/github.com/axllent/goiplookup)
+
 GoipLookup is a geoiplookup replacement for the [free GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
 written in [Go](https://golang.org/).
 
