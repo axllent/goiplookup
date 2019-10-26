@@ -1,19 +1,20 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"runtime"
+
+	flag "github.com/spf13/pflag"
 )
 
 // Flags
 var (
-	country       = flag.Bool("c", false, "return country name")
-	iso           = flag.Bool("i", false, "return country iso code")
-	showhelp      = flag.Bool("h", false, "show help")
-	verboseoutput = flag.Bool("v", false, "verbose/debug output")
-	showversion   = flag.Bool("V", false, "show version number")
+	country       bool
+	iso           bool
+	showhelp      bool
+	verboseoutput bool
+	showversion   bool
 	version       = "dev"
 )
 
@@ -35,10 +36,16 @@ func main() {
 		dataDir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
 	}
 
+	flag.BoolVarP(&country, "country", "c", false, "return country name")
+	flag.BoolVarP(&iso, "iso", "i", false, "return country iso code")
+	flag.BoolVarP(&showhelp, "help", "h", false, "show help")
+	flag.BoolVarP(&verboseoutput, "verbose", "v", false, "verbose/debug output")
+	flag.BoolVarP(&showversion, "version", "V", false, "show version number")
+
 	// parse flags
 	flag.Parse()
 
-	if *showversion {
+	if showversion {
 		fmt.Println(fmt.Sprintf("Version %s", version))
 		latest, err := LatestRelease()
 		if err == nil && version != latest {
@@ -52,7 +59,7 @@ func main() {
 		return
 	}
 
-	if len(flag.Args()) != 1 || *showhelp {
+	if len(flag.Args()) != 1 || showhelp {
 		ShowUsage()
 		return
 	}
@@ -73,15 +80,15 @@ func main() {
 
 // ShowUsage prints the help function
 var ShowUsage = func() {
-	fmt.Fprintf(os.Stderr, "Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>\n", os.Args[0])
+	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>\n", os.Args[0])
 	fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
 	fmt.Println("\nExamples:")
-	fmt.Fprintf(os.Stderr, "%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
-	fmt.Fprintf(os.Stderr, "%s self-update\t\t\tUpdate the GoIpLookup binary with the latest release\n", os.Args[0])
+	fmt.Printf("%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
+	fmt.Printf("%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
+	fmt.Printf("%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
+	fmt.Printf("%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
+	fmt.Printf("%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
+	fmt.Printf("%s self-update\t\t\tUpdate the GoIpLookup binary with the latest release\n", os.Args[0])
 }
