@@ -7,7 +7,6 @@ build = echo "\n\nBuilding $(1)-$(2)" && CGO_ENABLED=0 GOOS=$(1) GOARCH=$(2) go 
 	&& bzip2 dist/goiplookup_${VERSION}_$(1)_$(2)
 
 geoiplookup: goiplookup.go
-	go get github.com/oschwald/geoip2-golang
 	CGO_ENABLED=0 go build ${LDFLAGS}
 
 clean:

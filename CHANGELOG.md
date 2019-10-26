@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.0]
+
+- Switch to go modules (go >= 1.11 required)
+- Switch to [pflag](github.com/spf13/pflag) for more flexibility
+
+
 ## [0.1.0]
 
 - Add corruption check for downloaded databases before overwriting

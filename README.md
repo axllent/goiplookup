@@ -34,14 +34,11 @@ goiplookup self-update
 
 ## Compiling from source
 
-You must have golang installed. There is one external library required ([oschwald/geoip2-golang](github.com/oschwald/geoip2-golang)) which is downloaded automatically when you run `make`:
+Go >= 1.11 required:
 
 ```
-git clone git@github.com:axllent/goiplookup.git
-cd goiplookup
-make
+go get github.com:axllent/goiplookup.git
 ```
-
 
 ## Basic usage
 

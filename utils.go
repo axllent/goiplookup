@@ -91,11 +91,11 @@ func Lookup(lookup string) {
 		cname = record.Country.Names["en"]
 	}
 
-	if *country || *iso {
-		if *iso && ciso != "" {
+	if country || iso {
+		if iso && ciso != "" {
 			output = append(output, ciso)
 		}
-		if *country && cname != "" {
+		if country && cname != "" {
 			output = append(output, cname)
 		}
 		response = fmt.Sprintf(strings.Join(output, ", "))
@@ -260,7 +260,7 @@ func ReplaceFile(dst string, src string) error {
 
 // Verbose displays debug information with `-v`
 func Verbose(m string) {
-	if *verboseoutput {
+	if verboseoutput {
 		fmt.Println(m)
 	}
 }
