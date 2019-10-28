@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1]
+
+- Fix dataDir flag parsing
+
+
 ## [0.2.0]
 
 - Switch to go modules (go >= 1.11 required)

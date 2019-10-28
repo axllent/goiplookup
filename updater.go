@@ -23,12 +23,12 @@ func UpdateGeoLite2Country() {
 	gzfile := filepath.Join(tmpDir, "GeoLite2-Country.tar.gz")
 
 	// check the output directory is writeable
-	if _, err := os.Stat(*dataDir); os.IsNotExist(err) {
-		os.MkdirAll(*dataDir, os.ModePerm)
+	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
+		os.MkdirAll(dataDir, os.ModePerm)
 	}
 
-	if _, err := os.Stat(*dataDir); err != nil {
-		fmt.Println("Error: Cannot create", *dataDir)
+	if _, err := os.Stat(dataDir); err != nil {
+		fmt.Println("Error: Cannot create", dataDir)
 		os.Exit(1)
 	}
 
@@ -37,7 +37,7 @@ func UpdateGeoLite2Country() {
 		os.Exit(1)
 	}
 
-	if err := ExtractDatabaseFile(*dataDir, gzfile); err != nil {
+	if err := ExtractDatabaseFile(dataDir, gzfile); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
