@@ -15,11 +15,12 @@ var (
 	showhelp      bool
 	verboseoutput bool
 	showversion   bool
+	dataDir       string
 	version       = "dev"
 )
 
 // we set this in `main()` based on OS
-var dataDir (*string)
+// var dataDir (*string)
 
 // URLs
 const (
@@ -31,9 +32,9 @@ const (
 func main() {
 	// alternate default path for OSX
 	if runtime.GOOS == "darwin" {
-		dataDir = flag.String("d", "/usr/local/share/GeoIP", "database directory or file")
+		flag.StringVarP(&dataDir, "dir", "d", "/usr/local/share/GeoIP", "database directory or file")
 	} else {
-		dataDir = flag.String("d", "/usr/share/GeoIP", "database directory or file")
+		flag.StringVarP(&dataDir, "dir", "d", "/usr/share/GeoIP", "database directory or file")
 	}
 
 	flag.BoolVarP(&country, "country", "c", false, "return country name")
@@ -85,10 +86,10 @@ var ShowUsage = func() {
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
 	fmt.Println("\nExamples:")
-	fmt.Printf("%s 8.8.8.8\t\t\tReturn the country ISO code and name\n", os.Args[0])
-	fmt.Printf("%s -d ~/GeoIP 8.8.8.8\t\tUse a different database directory\n", os.Args[0])
-	fmt.Printf("%s -i 8.8.8.8\t\t\tReturn just the country ISO code\n", os.Args[0])
-	fmt.Printf("%s -c 8.8.8.8\t\t\tReturn just the country name\n", os.Args[0])
-	fmt.Printf("%s db-update\t\t\tUpdate the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
-	fmt.Printf("%s self-update\t\t\tUpdate the GoIpLookup binary with the latest release\n", os.Args[0])
+	fmt.Printf("%s 8.8.8.8               # Return the country ISO code and name\n", os.Args[0])
+	fmt.Printf("%s -d ~/GeoIP 8.8.8.8    # Use a different database directory\n", os.Args[0])
+	fmt.Printf("%s -i 8.8.8.8            # Return just the country ISO code\n", os.Args[0])
+	fmt.Printf("%s -c 8.8.8.8            # Return just the country name\n", os.Args[0])
+	fmt.Printf("%s db-update             # Update the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
+	fmt.Printf("%s self-update           # Update the GoIpLookup binary with the latest release\n", os.Args[0])
 }

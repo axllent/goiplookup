@@ -52,17 +52,17 @@ func Lookup(lookup string) {
 		os.Exit(1)
 	}
 
-	fi, err := os.Stat(*dataDir)
+	fi, err := os.Stat(dataDir)
 	if err != nil {
-		fmt.Println("Error: Directory does not exist", *dataDir)
+		fmt.Println("Error: Directory does not exist", dataDir)
 		os.Exit(1)
 	}
 
 	switch mode := fi.Mode(); {
 	case mode.IsDir(): // if dataDir is dir, append GeoLite2-Country.mmdb
-		mmdb = path.Join(*dataDir, "GeoLite2-Country.mmdb")
+		mmdb = path.Join(dataDir, "GeoLite2-Country.mmdb")
 	case mode.IsRegular():
-		mmdb = *dataDir
+		mmdb = dataDir
 	}
 
 	Verbose(fmt.Sprintf("Opening %s", mmdb))
