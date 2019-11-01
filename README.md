@@ -39,7 +39,7 @@ goiplookup self-update
 Go >= 1.11 required:
 
 ```
-go get github.com:axllent/goiplookup.git
+go get github.com/axllent/goiplookup
 ```
 
 ## Basic usage
