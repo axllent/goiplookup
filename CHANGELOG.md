@@ -3,6 +3,7 @@
 ## [dev]
 
 - Add support for MaxMind (free) license key requirement to update GeoLite2 databases
+- Switch to [ghru](https://github.com/axllent/ghru) for binary release updates
 
 
 ## [0.2.1]

@@ -1,3 +1,7 @@
+github.com/axllent/ghru v1.1.3 h1:n0jYsuqCYaHHAR6DraXZl8hpBY4j0XV47y5Lyym/jGo=
+github.com/axllent/ghru v1.1.3/go.mod h1:rFvMhcO1UAv2Cv6bXscS8EOc7qqNpfe8ZLp23utzs88=
+github.com/axllent/semver v0.0.0-20191103011746-394cefa91ee9 h1:LHNcCfePzgC/agAJs5a/5K3hFo8uW04bEdDKDkoX4do=
+github.com/axllent/semver v0.0.0-20191103011746-394cefa91ee9/go.mod h1:2xSPzvG8n9mRfdtxSvWvfTfQGWfHsMsHO1iZnKATMSc=
 github.com/oschwald/geoip2-golang v1.3.0 h1:D+Hsdos1NARPbzZ2aInUHZL+dApIzo8E0ErJVsWcku8=
 github.com/oschwald/geoip2-golang v1.3.0/go.mod h1:0LTTzix/Ao1uMvOhAV4iLU0Lz7eCrP94qZWBTDKf0iE=
 github.com/oschwald/maxminddb-golang v1.5.0 h1:rmyoIV6z2/s9TCJedUuDiKht2RN12LWJ1L7iRGtWY64=

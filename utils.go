@@ -1,35 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"path"
-	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/oschwald/geoip2-golang"
 )
-
-// Repository Struct for Github release json
-type Repository struct {
-	Assets []struct {
-		BrowserDownloadURL string `json:"browser_download_url"`
-		CreatedAt          string `json:"created_at"`
-		ID                 int64  `json:"id"`
-		Name               string `json:"name"`
-		Size               int64  `json:"size"`
-	} `json:"assets"`
-	Name        string `json:"name"`
-	Prerelease  bool   `json:"prerelease"`
-	PublishedAt string `json:"published_at"`
-	TagName     string `json:"tag_name"`
-}
 
 // Lookup ip or hostname
 func Lookup(lookup string) {
@@ -132,130 +113,6 @@ func DownloadToFile(filepath string, url string) error {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
-}
-
-// LatestRelease fetches the latest release
-func LatestRelease() (string, error) {
-	resp, err := http.Get(releaseURL)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return "", err
-	}
-
-	var result Repository
-
-	json.Unmarshal(body, &result)
-
-	return result.TagName, nil
-}
-
-// GetUpdateURL returns a download URL based on OS & architecture
-func GetUpdateURL() (string, error) {
-	Verbose(fmt.Sprintf("Fetching %s", releaseURL))
-	resp, err := http.Get(releaseURL)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-
-	if err != nil {
-		return "", err
-	}
-
-	var result Repository
-
-	json.Unmarshal(body, &result)
-
-	Verbose(fmt.Sprintf("Latest release is %s", result.TagName))
-	if version == result.TagName {
-		return "", fmt.Errorf("You already have the latest version (%s)", version)
-	}
-
-	linkOS := runtime.GOOS
-	linkArch := runtime.GOARCH
-	releaseName := fmt.Sprintf("goiplookup_%s_%s_%s.bz2", result.TagName, linkOS, linkArch)
-
-	Verbose(fmt.Sprintf("Searching %s", releaseName))
-
-	for _, v := range result.Assets {
-		if v.Name == releaseName {
-			Verbose(fmt.Sprintf("Found download URL %s", v.BrowserDownloadURL))
-			return v.BrowserDownloadURL, nil
-		}
-	}
-
-	return "", fmt.Errorf("No downlodable update found for %s", releaseName) // nothing found
-}
-
-// ReplaceFile replaces one file with another
-func ReplaceFile(dst string, src string) error {
-	// open the source file for reading
-	Verbose(fmt.Sprintf("Opening %s", src))
-	source, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-	defer source.Close()
-
-	// destination directory eg: /usr/local/bin
-	dstDir := filepath.Dir(dst)
-	// binary filename eg: goiplookup
-	binaryFilename := filepath.Base(dst)
-	// old tmp file name
-	dstOld := fmt.Sprintf("%s.old", binaryFilename)
-	// new tmp file name
-	dstNew := fmt.Sprintf("%s.new", binaryFilename)
-	// absolute path of new tmp file
-	newTmpAbs := filepath.Join(dstDir, dstNew)
-	// absolute path of old tmp file
-	oldTmpAbs := filepath.Join(dstDir, dstOld)
-
-	// create the new file
-	tmpNew, err := os.OpenFile(newTmpAbs, os.O_CREATE|os.O_RDWR, 0755)
-	if err != nil {
-		return err
-	}
-	defer tmpNew.Close()
-
-	// copy new binary to <binary>.new
-	Verbose(fmt.Sprintf("Copying %s to %s", src, newTmpAbs))
-	if _, err := io.Copy(tmpNew, source); err != nil {
-		return err
-	}
-
-	// rename the current executable to <binary>.old
-	Verbose(fmt.Sprintf("Renaming %s to %s", dst, oldTmpAbs))
-	if err := os.Rename(dst, oldTmpAbs); err != nil {
-		return err
-	}
-
-	// rename the <binary>.new to current executable
-	Verbose(fmt.Sprintf("Renaming %s to %s", newTmpAbs, dst))
-	if err := os.Rename(newTmpAbs, dst); err != nil {
-		return err
-	}
-
-	// delete the old binary
-	Verbose(fmt.Sprintf("Deleting %s", oldTmpAbs))
-	if err := os.Remove(oldTmpAbs); err != nil {
-		return err
-	}
-
-	// remove the src file
-	Verbose(fmt.Sprintf("Deleting %s", src))
-	if err := os.Remove(src); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 // Verbose displays debug information with `-v`
