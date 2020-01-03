@@ -1,5 +1,10 @@
 # Changelog
 
+## [dev]
+
+- Add support for MaxMind (free) license key requirement to update GeoLite2 databases
+
+
 ## [0.2.1]
 
 - Fix dataDir flag parsing
