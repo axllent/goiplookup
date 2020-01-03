@@ -16,16 +16,13 @@ var (
 	verboseoutput bool
 	showversion   bool
 	dataDir       string
+	licenseKey    string // GeoLite2 license key for updating
 	version       = "dev"
 )
 
-// we set this in `main()` based on OS
-// var dataDir (*string)
-
 // URLs
 const (
-	dbUpdateURL = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
-	releaseURL  = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
+	releaseURL = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
 )
 
 // Main function

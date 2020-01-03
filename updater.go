@@ -17,6 +17,19 @@ import (
 
 // UpdateGeoLite2Country updates GeoLite2-Country.mmdb
 func UpdateGeoLite2Country() {
+
+	key := os.Getenv("LICENSEKEY")
+	if key == "" && licenseKey != "" {
+		key = licenseKey
+	}
+
+	if key == "" {
+		fmt.Println("Error: GeoIP License Key not set.\nPlease see https://github.com/axllent/goiplookup/blob/develop/README.md#database-updates")
+		os.Exit(1)
+	}
+
+	dbUpdateURL := fmt.Sprintf("https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=%s&suffix=tar.gz", key)
+
 	Verbose("Updating GeoLite2-Country.mmdb")
 
 	tmpDir := os.TempDir()
