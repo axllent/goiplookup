@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/axllent/ghru"
 	flag "github.com/spf13/pflag"
 )
 
@@ -16,16 +17,13 @@ var (
 	verboseoutput bool
 	showversion   bool
 	dataDir       string
+	licenseKey    string // GeoLite2 license key for updating
 	version       = "dev"
 )
 
-// we set this in `main()` based on OS
-// var dataDir (*string)
-
 // URLs
 const (
-	dbUpdateURL = "https://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz"
-	releaseURL  = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
+	releaseURL = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
 )
 
 // Main function
@@ -48,16 +46,12 @@ func main() {
 
 	if showversion {
 		fmt.Println(fmt.Sprintf("Version %s", version))
-		latest, err := LatestRelease()
-		if err == nil && version != latest {
-			fmt.Println(fmt.Sprintf("Version %s available", latest))
-			if _, err := GetUpdateURL(); err == nil {
-				fmt.Println(fmt.Sprintf("Run `%s self-update` to update", os.Args[0]))
-			}
-		} else {
-			fmt.Println("You have the latest version")
+
+		latest, _, _, err := ghru.Latest("axllent/goiplookup", "goiplookup")
+		if err == nil && ghru.GreaterThan(latest, version) {
+			fmt.Printf("Update available: %s\nRun `%s self-update` to update\n", latest, os.Args[0])
 		}
-		return
+		os.Exit(0)
 	}
 
 	if len(flag.Args()) != 1 || showhelp {
@@ -72,7 +66,12 @@ func main() {
 		UpdateGeoLite2Country()
 	} else if lookup == "self-update" {
 		// update app if needed
-		SelfUpdate()
+		rel, err := ghru.Update("axllent/goiplookup", "goiplookup", version)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Updated %s to version %s\n", os.Args[0], rel)
+		os.Exit(0)
 	} else {
 		// lookup ip/hostname
 		Lookup(lookup)

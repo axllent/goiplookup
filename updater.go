@@ -2,7 +2,6 @@ package main
 
 import (
 	"archive/tar"
-	"compress/bzip2"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -17,6 +16,19 @@ import (
 
 // UpdateGeoLite2Country updates GeoLite2-Country.mmdb
 func UpdateGeoLite2Country() {
+
+	key := os.Getenv("LICENSEKEY")
+	if key == "" && licenseKey != "" {
+		key = licenseKey
+	}
+
+	if key == "" {
+		fmt.Println("Error: GeoIP License Key not set.\nPlease see https://github.com/axllent/goiplookup#database-updates")
+		os.Exit(1)
+	}
+
+	dbUpdateURL := fmt.Sprintf("https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=%s&suffix=tar.gz", key)
+
 	Verbose("Updating GeoLite2-Country.mmdb")
 
 	tmpDir := os.TempDir()
@@ -125,70 +137,4 @@ func ExtractDatabaseFile(dst string, targz string) error {
 			}
 		}
 	}
-}
-
-// SelfUpdate is a built-in updater
-func SelfUpdate() {
-	tmpDir := os.TempDir()
-	bz2file := filepath.Join(tmpDir, "goiplookup.bz2")
-	newexec := filepath.Join(tmpDir, "goiplookup.tmp")
-
-	downloadURL, err := GetUpdateURL()
-	fmt.Println(fmt.Sprintf("Updating %s", os.Args[0]))
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Error: %s", err))
-		os.Exit(1)
-	}
-
-	if err := DownloadToFile(bz2file, downloadURL); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	Verbose(fmt.Sprintf("Opening %s", bz2file))
-	f, err := os.OpenFile(bz2file, 0, 0)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Error: %s", err))
-		os.Exit(1)
-	}
-	defer f.Close()
-
-	// create a bzip2 reader
-	br := bzip2.NewReader(f)
-
-	// write the file
-	out, err := os.OpenFile(newexec, os.O_CREATE|os.O_RDWR, 0755)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Error: %s", err))
-		os.Exit(1)
-	}
-
-	Verbose(fmt.Sprintf("Extracting %s", newexec))
-
-	_, err = io.Copy(out, br)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Error: %s", err))
-		os.Exit(1)
-	}
-
-	// replace os.Args[0] with new file
-	// cannot overwrite open file so rename then delete
-	// get executable's absolute path
-	oldexec, _ := os.Readlink("/proc/self/exe")
-
-	err = ReplaceFile(oldexec, newexec)
-	if err != nil {
-		fmt.Println(fmt.Sprintf("Error: %s", err))
-		fmt.Println("You may require root permissions.")
-		os.Exit(1)
-	}
-
-	// remove the src file
-	Verbose(fmt.Sprintf("Deleting %s", bz2file))
-	if err := os.Remove(bz2file); err != nil {
-		fmt.Println(fmt.Sprintf("Error: %s", err))
-		os.Exit(1)
-	}
-
-	fmt.Println("Done")
 }
