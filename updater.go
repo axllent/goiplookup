@@ -23,7 +23,7 @@ func UpdateGeoLite2Country() {
 	}
 
 	if key == "" {
-		fmt.Println("Error: GeoIP License Key not set.\nPlease see https://github.com/axllent/goiplookup/blob/develop/README.md#database-updates")
+		fmt.Println("Error: GeoIP License Key not set.\nPlease see https://github.com/axllent/goiplookup#database-updates")
 		os.Exit(1)
 	}
 
