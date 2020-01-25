@@ -1,8 +1,8 @@
-# GoipLookup - geoiplookup for GeoLite2 written in Go
+# GoIPLookup - geoiplookup for GeoLite2 written in Go
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/axllent/goiplookup)](https://goreportcard.com/report/github.com/axllent/goiplookup)
 
-GoipLookup is a geoiplookup replacement for the [free MaxMind GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
+GoIPLookup is a geoiplookup replacement for the [free MaxMind GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
 written in [Go](https://golang.org/).
 
 It currently only supports the free GeoLite2-Country database, and there is no planned support for the other types.
@@ -10,7 +10,7 @@ It currently only supports the free GeoLite2-Country database, and there is no p
 
 ## Features
 
-- Drop-in replacement for the now defunt `geoiplookup` utility, simply rename it
+- Drop-in replacement for the now defunct `geoiplookup` utility, simply rename it
 - Works with the current MaxMind database format (mmdd)
 - IPv4, IPv6 and fully qualified domain name (FQDN) support
 - Options to return just the country iso (`NZ`) or country name (`New Zealand`), rather than the full `GeoIP Country Edition: NZ, New Zealand`
@@ -49,9 +49,9 @@ goiplookup self-update			Update the GoIpLookup binary with the latest release
 ```
 
 
-## GoipLookup updates
+## GoIPLookup updates
 
-GoipLookup comes with a built-in self-updater:
+GoIPLookup comes with a built-in self-updater:
 
 ```
 goiplookup self-update
@@ -62,7 +62,7 @@ Version checked (`goiplookup -V`) will tell you if your version is out of date.
 
 ## Database updates
 
-GoipLookup is able to update your GeoLite2 Country database. As of 01/01/2020 MaxMind require a (free) License Key in order to download these updates. The release (binary) versions of goiplookup (>= 0.2.2) already contain a key for this, however if you are compiling from source you will need to set your own licence key in your environment (see below).
+GoIPLookup is able to update your GeoLite2 Country database. As of 01/01/2020 MaxMind require a (free) License Key in order to download these updates. The release (binary) versions of goiplookup (>= 0.2.2) already contain a key for this, however if you are compiling from source you will need to set your own licence key in your environment (see below).
 
 
 ### Binary release database updates
