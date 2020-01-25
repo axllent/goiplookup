@@ -40,12 +40,12 @@ Options:
   -v	verbose/debug output
 
 Examples:
-goiplookup 8.8.8.8			Return the country ISO code and name
-goiplookup -d ~/GeoIP 8.8.8.8		Use a different database directory
-goiplookup -i 8.8.8.8			Return just the country ISO code
-goiplookup -c 8.8.8.8			Return just the country name
-goiplookup db-update			Update the GeoLite2-Country database (do not run more than once a month)
-goiplookup self-update			Update the GoIpLookup binary with the latest release
+goiplookup 8.8.8.8				# Return the country ISO code and name
+goiplookup -d ~/GeoIP 8.8.8.8	# Use a different database directory
+goiplookup -i 8.8.8.8			# Return just the country ISO code
+goiplookup -c 8.8.8.8			# Return just the country name
+goiplookup db-update			# Update the GeoLite2-Country database (do not run more than once a month)
+goiplookup self-update			# Update the GoIpLookup binary with the latest release
 ```
 
 
