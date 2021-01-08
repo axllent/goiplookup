@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3]
+
+- Update go modules
+- Remove unsupported 386 darwin builds
+- Remove unnecessary static flag
+
+
 ## [0.2.2]
 
 - Add support for MaxMind (free) license key requirement to update GeoLite2 databases
