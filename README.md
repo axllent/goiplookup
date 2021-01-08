@@ -86,6 +86,10 @@ export LICENSEKEY="xxxxxxxx"
 goiplookup db-update
 ```
 
+or if you wish to compile the source code yourself with your key:
+```
+make LICENSEKEY="xxxxxxxx"
+```
 
 ## Compiling from source
 

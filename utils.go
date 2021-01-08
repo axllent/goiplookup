@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -92,12 +93,22 @@ func Lookup(lookup string) {
 }
 
 // DownloadToFile downloads a URL to a file
-func DownloadToFile(filepath string, url string) error {
+func DownloadToFile(filepath string, uri string) error {
+	debugURI := uri
+	u, err := url.Parse(uri)
+	if err != nil {
+		return err
+	}
+	q := u.Query()
+	if q.Get("license_key") != "" {
+		// remove key from debug
+		debugURI = strings.Replace(debugURI, q.Get("license_key"), "xxxxxxxxxx", -1)
+	}
 
-	Verbose(fmt.Sprintf("Downloading %s", url))
+	Verbose(fmt.Sprintf("Downloading %s", debugURI))
 
 	// Get the data
-	resp, err := http.Get(url)
+	resp, err := http.Get(uri)
 	if err != nil {
 		return err
 	}
