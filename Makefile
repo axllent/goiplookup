@@ -1,7 +1,7 @@
 
 TAG=`git describe --tags`
 VERSION ?= `git describe --tags`
-LDFLAGS=-ldflags "-s -extldflags \"--static\" -w -X main.version=${VERSION} -X main.licenseKey=${LICENSEKEY}"
+LDFLAGS=-ldflags "-s -w -X main.version=${VERSION} -X main.licenseKey=${LICENSEKEY}"
 
 build = echo "\n\nBuilding $(1)-$(2)" && CGO_ENABLED=0 GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/goiplookup_${VERSION}_$(1)_$(2) \
 	&& bzip2 dist/goiplookup_${VERSION}_$(1)_$(2)
