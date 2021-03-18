@@ -3,7 +3,7 @@ TAG=`git describe --tags`
 VERSION ?= `git describe --tags`
 LDFLAGS=-ldflags "-s -w -X main.version=${VERSION} -X main.licenseKey=${LICENSEKEY}"
 
-build = echo "\n\nBuilding $(1)-$(2)" && CGO_ENABLED=0 GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/goiplookup_${VERSION}_$(1)_$(2) \
+build = echo "\n\nBuilding $(1)-$(2)" && GO386=softfloat CGO_ENABLED=0 GOOS=$(1) GOARCH=$(2) go build ${LDFLAGS} -o dist/goiplookup_${VERSION}_$(1)_$(2) \
 	&& bzip2 dist/goiplookup_${VERSION}_$(1)_$(2)
 
 geoiplookup: goiplookup.go
@@ -20,4 +20,5 @@ release:
 	$(call build,linux,arm)
 	$(call build,linux,arm64)
 	$(call build,darwin,amd64)
+	$(call build,darwin,arm64)
 
