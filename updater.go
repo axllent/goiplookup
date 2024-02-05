@@ -3,12 +3,16 @@ package main
 import (
 	"archive/tar"
 	"compress/gzip"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
+	"time"
 
 	"github.com/oschwald/geoip2-golang"
 )
@@ -27,6 +31,17 @@ func UpdateGeoLite2Country() {
 	}
 
 	dbUpdateURL := fmt.Sprintf("https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-Country&license_key=%s&suffix=tar.gz", key)
+
+	updateRequired, err := requiresDBUpdate(dbUpdateURL)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+
+	if !updateRequired {
+		Verbose("No database update available")
+		os.Exit(0)
+	}
 
 	Verbose("Updating GeoLite2-Country.mmdb")
 
@@ -57,6 +72,48 @@ func UpdateGeoLite2Country() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+}
+
+// get last-modified header to see if it is an update
+func requiresDBUpdate(updateURL string) (bool, error) {
+	dstFile := path.Join(dataDir, "GeoLite2-Country.mmdb")
+	if !isFile(dstFile) {
+		// missing local file, update
+		return true, nil
+	}
+
+	info, err := os.Stat(dstFile)
+	if err != nil {
+		return false, err
+	}
+
+	lastModifiedLocal := info.ModTime()
+
+	res, err := http.Head(updateURL)
+	if err != nil {
+		return false, err
+	}
+
+	lmHdr := res.Header.Get("last-modified")
+	if lmHdr == "" {
+		return false, errors.New("update server returned unexpected response")
+	}
+
+	lastModifiedRemote, err := time.Parse(time.RFC1123, lmHdr)
+	if err != nil {
+		return false, err
+	}
+
+	return lastModifiedRemote.After(lastModifiedLocal), nil
+}
+
+func getLastModifiedFromHeader(h string) time.Time {
+	var t time.Time
+	if h == "" {
+		return t
+	}
+	t, _ = time.Parse(time.RFC1123, h)
+	return t
 }
 
 // ExtractDatabaseFile extracts just the GeoLite2-Country.mmdb from the tar.gz
