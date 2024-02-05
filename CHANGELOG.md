@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0]
+
+- Only download database update if missing locally or update is newer than local database
+- Code cleanup
+- Update Go modules
+
+
 ## [0.2.3]
 
 - Update go modules
