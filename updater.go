@@ -5,7 +5,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,7 +31,7 @@ func UpdateGeoLite2Country() {
 	Verbose("Updating GeoLite2-Country.mmdb")
 
 	tmpDir := os.TempDir()
-	gzfile := filepath.Join(tmpDir, "GeoLite2-Country.tar.gz")
+	gzFile := filepath.Join(tmpDir, "GeoLite2-Country.tar.gz")
 
 	// check the output directory is writeable
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
@@ -44,29 +43,29 @@ func UpdateGeoLite2Country() {
 		os.Exit(1)
 	}
 
-	if err := DownloadToFile(gzfile, dbUpdateURL); err != nil {
+	if err := DownloadToFile(gzFile, dbUpdateURL); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := ExtractDatabaseFile(dataDir, gzfile); err != nil {
+	if err := ExtractDatabaseFile(dataDir, gzFile); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := os.Remove(gzfile); err != nil {
+	if err := os.Remove(gzFile); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
 // ExtractDatabaseFile extracts just the GeoLite2-Country.mmdb from the tar.gz
-func ExtractDatabaseFile(dst string, targz string) error {
-	Verbose(fmt.Sprintf("Opening %s", targz))
+func ExtractDatabaseFile(dst string, tarGz string) error {
+	Verbose(fmt.Sprintf("Opening %s", tarGz))
 
 	re, _ := regexp.Compile(`GeoLite2\-Country\.mmdb$`)
 
-	r, err := os.Open(targz)
+	r, err := os.Open(tarGz)
 	if err != nil {
 		return err
 	}
@@ -106,7 +105,7 @@ func ExtractDatabaseFile(dst string, targz string) error {
 				outFile := filepath.Join(dst, "GeoLite2-Country.mmdb")
 
 				// tmpFile is used to first ensure the extracted database is valid before replacing the previous one
-				tmpFile, err := ioutil.TempFile("", "testDBFile")
+				tmpFile, err := os.CreateTemp("", "testDBFile")
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -125,12 +124,12 @@ func ExtractDatabaseFile(dst string, targz string) error {
 
 				Verbose(fmt.Sprintf("Copy %s to %s", tmpFile.Name(), outFile))
 
-				input, err := ioutil.ReadFile(tmpFile.Name())
+				input, err := os.ReadFile(tmpFile.Name())
 				if err != nil {
 					return err
 				}
 
-				err = ioutil.WriteFile(outFile, input, 0644)
+				err = os.WriteFile(outFile, input, 0644)
 				if err != nil {
 					return err
 				}

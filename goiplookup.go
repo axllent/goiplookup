@@ -1,9 +1,9 @@
+// Package main is the main application
 package main
 
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/axllent/ghru"
 	flag "github.com/spf13/pflag"
@@ -13,9 +13,9 @@ import (
 var (
 	country       bool
 	iso           bool
-	showhelp      bool
-	verboseoutput bool
-	showversion   bool
+	showHelp      bool
+	verboseOutput bool
+	showVersion   bool
 	dataDir       string
 	licenseKey    string // GeoLite2 license key for updating
 	version       = "dev"
@@ -28,23 +28,24 @@ const (
 
 // Main function
 func main() {
-	// alternate default path for OSX
-	if runtime.GOOS == "darwin" {
-		flag.StringVarP(&dataDir, "dir", "d", "/usr/local/share/GeoIP", "database directory or file")
-	} else {
-		flag.StringVarP(&dataDir, "dir", "d", "/usr/share/GeoIP", "database directory or file")
+
+	p := "/usr/share/GeoIP"
+	if isDir("/usr/local/share/GeoIP") {
+		// alternate default path for OSX or custom
+		p = "/usr/local/share/GeoIP"
 	}
+	flag.StringVarP(&dataDir, "dir", "d", p, "database directory or file")
 
 	flag.BoolVarP(&country, "country", "c", false, "return country name")
 	flag.BoolVarP(&iso, "iso", "i", false, "return country iso code")
-	flag.BoolVarP(&showhelp, "help", "h", false, "show help")
-	flag.BoolVarP(&verboseoutput, "verbose", "v", false, "verbose/debug output")
-	flag.BoolVarP(&showversion, "version", "V", false, "show version number")
+	flag.BoolVarP(&showHelp, "help", "h", false, "show help")
+	flag.BoolVarP(&verboseOutput, "verbose", "v", false, "verbose/debug output")
+	flag.BoolVarP(&showVersion, "version", "V", false, "show version number")
 
 	// parse flags
 	flag.Parse()
 
-	if showversion {
+	if showVersion {
 		fmt.Println(fmt.Sprintf("Version %s", version))
 
 		latest, _, _, err := ghru.Latest("axllent/goiplookup", "goiplookup")
@@ -54,8 +55,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(flag.Args()) != 1 || showhelp {
-		ShowUsage()
+	if len(flag.Args()) != 1 || showHelp {
+		showUsage()
 		return
 	}
 
@@ -79,7 +80,7 @@ func main() {
 }
 
 // ShowUsage prints the help function
-var ShowUsage = func() {
+var showUsage = func() {
 	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>\n", os.Args[0])
 	fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
 	fmt.Println("\nOptions:")
