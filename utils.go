@@ -126,9 +126,29 @@ func DownloadToFile(filepath string, uri string) error {
 	return err
 }
 
+// IsFile returns if a path is a file
+func isFile(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) || !info.Mode().IsRegular() {
+		return false
+	}
+
+	return true
+}
+
+// IsDir returns whether a path is a directory
+func isDir(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) || !info.IsDir() {
+		return false
+	}
+
+	return true
+}
+
 // Verbose displays debug information with `-v`
 func Verbose(m string) {
-	if verboseoutput {
+	if verboseOutput {
 		fmt.Println(m)
 	}
 }
