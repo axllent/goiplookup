@@ -69,7 +69,8 @@ func main() {
 		// update app if needed
 		rel, err := ghru.Update("axllent/goiplookup", "goiplookup", version)
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
+			os.Exit(1)
 		}
 		fmt.Printf("Updated %s to version %s\n", os.Args[0], rel)
 		os.Exit(0)
