@@ -13,8 +13,8 @@ import (
 	"github.com/oschwald/geoip2-golang"
 )
 
-// Lookup ip or hostname
-func Lookup(lookup string) {
+// LookupAddr looks up an ip or hostname
+func lookupAddr(lookup string) {
 
 	var ciso string
 	var cname string
@@ -27,7 +27,7 @@ func Lookup(lookup string) {
 	addresses, err := net.LookupHost(lookup)
 
 	if len(addresses) > 0 {
-		Verbose(fmt.Sprintf("Ip search for: %s", addresses[0]))
+		verbose(fmt.Sprintf("Ip search for: %s", addresses[0]))
 		ipraw = addresses[0]
 	} else {
 		fmt.Println("Error:", err)
@@ -47,14 +47,14 @@ func Lookup(lookup string) {
 		mmdb = dataDir
 	}
 
-	Verbose(fmt.Sprintf("Opening %s", mmdb))
+	verbose(fmt.Sprintf("Opening %s", mmdb))
 
 	db, err := geoip2.Open(mmdb)
 	if err != nil {
 		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	ip := net.ParseIP(ipraw)
 
@@ -65,7 +65,7 @@ func Lookup(lookup string) {
 	}
 
 	if record.Traits.IsAnonymousProxy {
-		Verbose("Anonymous IP detected")
+		verbose("Anonymous IP detected")
 		ciso = "A1"
 		cname = "Anonymous Proxy"
 	} else {
@@ -80,7 +80,7 @@ func Lookup(lookup string) {
 		if country && cname != "" {
 			output = append(output, cname)
 		}
-		response = fmt.Sprintf(strings.Join(output, ", "))
+		response = strings.Join(output, ", ")
 	} else {
 		if ciso == "" {
 			response = "GeoIP Country Edition: IP Address not found"
@@ -93,7 +93,7 @@ func Lookup(lookup string) {
 }
 
 // DownloadToFile downloads a URL to a file
-func DownloadToFile(filepath string, uri string) error {
+func downloadToFile(filepath string, uri string) error {
 	debugURI := uri
 	u, err := url.Parse(uri)
 	if err != nil {
@@ -102,24 +102,24 @@ func DownloadToFile(filepath string, uri string) error {
 	q := u.Query()
 	if q.Get("license_key") != "" {
 		// remove key from debug
-		debugURI = strings.Replace(debugURI, q.Get("license_key"), "xxxxxxxxxx", -1)
+		debugURI = strings.ReplaceAll(debugURI, q.Get("license_key"), "xxxxxxxxxx")
 	}
 
-	Verbose(fmt.Sprintf("Downloading %s", debugURI))
+	verbose(fmt.Sprintf("Downloading %s", debugURI))
 
 	// Get the data
 	resp, err := http.Get(uri)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Create the file
 	out, err := os.Create(filepath)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
@@ -147,7 +147,7 @@ func isDir(path string) bool {
 }
 
 // Verbose displays debug information with `-v`
-func Verbose(m string) {
+func verbose(m string) {
 	if verboseOutput {
 		fmt.Println(m)
 	}
