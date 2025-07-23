@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+- Add support for GeoLite2-City.mmdb database (city-level lookups)
+- Add `db-update-city` command to update the City database
+- Help output and documentation updated for City support
+- Batch lookup support: use `-f <file>` to process a list of IPs (one per line) and output JSON for each
+
 ## [0.3.0]
 
 - Only download database update if missing locally or update is newer than local database

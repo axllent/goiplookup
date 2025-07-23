@@ -197,3 +197,142 @@ func extractDatabaseFile(dst string, tarGz string) error {
 		}
 	}
 }
+
+// UpdateGeoLite2City updates GeoLite2-City.mmdb
+func updateGeoLite2City() {
+	key := os.Getenv("LICENSEKEY")
+	if key == "" && licenseKey != "" {
+		key = licenseKey
+	}
+	if key == "" {
+		fmt.Println("Error: GeoIP License Key not set.\nPlease see https://github.com/axllent/goiplookup#database-updates")
+		os.Exit(1)
+	}
+	dbUpdateURL := fmt.Sprintf("https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=%s&suffix=tar.gz", key)
+
+	updateRequired, err := requiresDBUpdateCity(dbUpdateURL)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	if !updateRequired {
+		verbose("No city database update available")
+		os.Exit(0)
+	}
+	verbose("Updating GeoLite2-City.mmdb")
+	tmpDir := os.TempDir()
+	gzFile := filepath.Join(tmpDir, "GeoLite2-City.tar.gz")
+	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(dataDir, os.ModePerm); err != nil {
+			fmt.Println("Error: Cannot create", dataDir)
+			os.Exit(1)
+		}
+	}
+	if _, err := os.Stat(dataDir); err != nil {
+		fmt.Println("Error: Cannot create", dataDir)
+		os.Exit(1)
+	}
+	if err := downloadToFile(gzFile, dbUpdateURL); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if err := extractDatabaseFileCity(dataDir, gzFile); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if err := os.Remove(gzFile); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+// get last-modified header to see if it is an update for City
+func requiresDBUpdateCity(updateURL string) (bool, error) {
+	dstFile := path.Join(dataDir, "GeoLite2-City.mmdb")
+	if !isFile(dstFile) {
+		return true, nil
+	}
+	info, err := os.Stat(dstFile)
+	if err != nil {
+		return false, err
+	}
+	lastModifiedLocal := info.ModTime()
+	res, err := http.Head(updateURL)
+	if err != nil {
+		return false, err
+	}
+	lmHdr := res.Header.Get("last-modified")
+	if lmHdr == "" {
+		return false, errors.New("update server returned unexpected response")
+	}
+	lastModifiedRemote, err := time.Parse(time.RFC1123, lmHdr)
+	if err != nil {
+		return false, err
+	}
+	return lastModifiedRemote.After(lastModifiedLocal), nil
+}
+
+// ExtractDatabaseFileCity extracts just the GeoLite2-City.mmdb from the tar.gz
+func extractDatabaseFileCity(dst string, tarGz string) error {
+	verbose(fmt.Sprintf("Opening %s", tarGz))
+
+	re, _ := regexp.Compile(`GeoLite2\-City\.mmdb$`)
+
+	r, err := os.Open(tarGz)
+	if err != nil {
+		return err
+	}
+	gzr, err := gzip.NewReader(r)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = gzr.Close() }()
+	tr := tar.NewReader(gzr)
+	for {
+		header, err := tr.Next()
+		switch {
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
+		case header == nil:
+			continue
+		}
+		target := filepath.Join(dst, header.Name)
+		switch header.Typeflag {
+		case tar.TypeReg:
+			if re.Match([]byte(target)) {
+				outFile := filepath.Join(dst, "GeoLite2-City.mmdb")
+				tmpFile, err := os.CreateTemp("", "testDBFile")
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer func() { _ = os.Remove(tmpFile.Name()) }()
+				verbose(fmt.Sprintf("Copy GeoLite2-City.mmdb to %s for testing", tmpFile.Name()))
+				if _, err := io.Copy(tmpFile, tr); err != nil {
+					return err
+				}
+				db, err := geoip2.Open(tmpFile.Name())
+				if err != nil {
+					return fmt.Errorf("downloaded GeoLite2-City.mmdb database (%s) corrupt, aborting updating", tmpFile.Name())
+				}
+				_ = db.Close()
+				verbose(fmt.Sprintf("Copy %s to %s", tmpFile.Name(), outFile))
+				input, err := os.ReadFile(tmpFile.Name())
+				if err != nil {
+					return err
+				}
+				err = os.WriteFile(outFile, input, 0644)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	if !isFile(path.Join(dst, "GeoLite2-City.mmdb")) {
+		fmt.Println("GeoLite2-City.mmdb was not found after extraction. Please check your license key and try again.")
+	}
+
+	return nil
+}
