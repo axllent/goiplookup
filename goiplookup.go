@@ -59,10 +59,10 @@ func main() {
 
 	switch lookup {
 	case "db-update":
-		// update database
 		updateGeoLite2Country()
+	case "db-update-city":
+		updateGeoLite2City()
 	case "self-update":
-		// update app if needed
 		rel, err := ghru.Update("axllent/goiplookup", "goiplookup", version)
 		if err != nil {
 			fmt.Println(err.Error())
@@ -71,7 +71,6 @@ func main() {
 		fmt.Printf("Updated %s to version %s\n", os.Args[0], rel)
 		os.Exit(0)
 	default:
-		// lookup ip/hostname
 		lookupAddr(lookup)
 	}
 }
@@ -79,14 +78,15 @@ func main() {
 // ShowUsage prints the help function
 var showUsage = func() {
 	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>\n", os.Args[0])
-	fmt.Println("\nGoiplookup uses the GeoLite2-Country database to find the Country that an IP address or hostname originates from.")
+	fmt.Println("\nGoiplookup uses the GeoLite2-Country or GeoLite2-City database to find the Country or City that an IP address or hostname originates from.")
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
 	fmt.Println("\nExamples:")
-	fmt.Printf("%s 8.8.8.8               # Return the country ISO code and name\n", os.Args[0])
+	fmt.Printf("%s 8.8.8.8               # Return the country/city ISO code and name\n", os.Args[0])
 	fmt.Printf("%s -d ~/GeoIP 8.8.8.8    # Use a different database directory\n", os.Args[0])
 	fmt.Printf("%s -i 8.8.8.8            # Return just the country ISO code\n", os.Args[0])
 	fmt.Printf("%s -c 8.8.8.8            # Return just the country name\n", os.Args[0])
 	fmt.Printf("%s db-update             # Update the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
+	fmt.Printf("%s db-update-city        # Update the GeoLite2-City database (do not run more than once a month)\n", os.Args[0])
 	fmt.Printf("%s self-update           # Update the GoIpLookup binary with the latest release\n", os.Args[0])
 }

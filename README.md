@@ -2,16 +2,18 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/axllent/goiplookup)](https://goreportcard.com/report/github.com/axllent/goiplookup)
 
-GoIPLookup is a geoiplookup replacement for the [free MaxMind GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/),
+GoIPLookup is a geoiplookup replacement for the [free MaxMind GeoLite2-Country](https://dev.maxmind.com/geoip/geoip2/geolite2/) and [GeoLite2-City](https://dev.maxmind.com/geoip/geoip2/geolite2/),
 written in [Go](https://golang.org/).
 
-It currently only supports the free GeoLite2-Country database, and there is no planned support for the other types.
+It currently supports the free GeoLite2-Country and GeoLite2-City databases. There is no planned support for other types.
 
 ## Features
 
 -   Drop-in replacement for the now defunct `geoiplookup` utility, simply rename it
--   Works with the current MaxMind database format (mmdd)
+-   Works with the current MaxMind database format (mmdb)
 -   IPv4, IPv6 and fully qualified domain name (FQDN) support
+-   Supports both GeoLite2-Country and GeoLite2-City databases
+-   City database returns city, subdivision, country ISO and name
 -   Options to return just the country iso (`NZ`) or country name (`New Zealand`), rather than the full `GeoIP Country Edition: NZ, New Zealand`
 -   Built-in database update support (see [Database updates](#database-updates))
 -   Built-in self updater (if new release is available)
@@ -37,13 +39,16 @@ Options:
   -v	verbose/debug output
 
 Examples:
-goiplookup 8.8.8.8			Return the country ISO code and name
-goiplookup -d ~/GeoIP 8.8.8.8		Use a different database directory
-goiplookup -i 8.8.8.8			Return just the country ISO code
-goiplookup -c 8.8.8.8			Return just the country name
-goiplookup db-update			Update the GeoLite2-Country database (do not run more than once a month)
-goiplookup self-update			Update the GoIpLookup binary with the latest release
+goiplookup 8.8.8.8               Return the country/city ISO code and name
+goiplookup -d ~/GeoIP 8.8.8.8    Use a different database directory
+goiplookup -i 8.8.8.8            Return just the country ISO code
+goiplookup -c 8.8.8.8            Return just the country name
+goiplookup db-update             Update the GeoLite2-Country database (do not run more than once a month)
+goiplookup db-update-city        Update the GeoLite2-City database (do not run more than once a month)
+goiplookup self-update           Update the GoIpLookup binary with the latest release
 ```
+
+If the GeoLite2-City database is present, output will include city and subdivision information.
 
 ## GoIPLookup updates
 
@@ -57,12 +62,13 @@ Version checked (`goiplookup -V`) will tell you if your version is out of date.
 
 ## Database updates
 
-GoIPLookup is able to update your GeoLite2 Country database. As of 01/01/2020 MaxMind require a (free) License Key in order to download these updates. The release (binary) versions of goiplookup (>= 0.2.2) already contain a key for this, however if you are compiling from source you will need to set your own licence key in your environment (see below).
+GoIPLookup is able to update your GeoLite2 Country and City databases. As of 01/01/2020 MaxMind require a (free) License Key in order to download these updates. The release (binary) versions of goiplookup (>= 0.2.2) already contain a key for this, however if you are compiling from source you will need to set your own licence key in your environment (see below).
 
 ### Binary release database updates
 
 ```
-goiplookup db-update
+goiplookup db-update         # Update Country database
+goiplookup db-update-city    # Update City database
 ```
 
 ### Self-compiled database updates

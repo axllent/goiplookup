@@ -18,6 +18,8 @@ func lookupAddr(lookup string) {
 
 	var ciso string
 	var cname string
+	var cityName string
+	var subdivisionName string
 	var mmdb string
 	var output []string
 	var response string
@@ -41,8 +43,14 @@ func lookupAddr(lookup string) {
 	}
 
 	switch mode := fi.Mode(); {
-	case mode.IsDir(): // if dataDir is dir, append GeoLite2-Country.mmdb
-		mmdb = path.Join(dataDir, "GeoLite2-Country.mmdb")
+	case mode.IsDir(): // if dataDir is dir, try City then Country
+		cityPath := path.Join(dataDir, "GeoLite2-City.mmdb")
+		countryPath := path.Join(dataDir, "GeoLite2-Country.mmdb")
+		if isFile(cityPath) {
+			mmdb = cityPath
+		} else {
+			mmdb = countryPath
+		}
 	case mode.IsRegular():
 		mmdb = dataDir
 	}
@@ -58,34 +66,59 @@ func lookupAddr(lookup string) {
 
 	ip := net.ParseIP(ipraw)
 
-	record, err := db.Country(ip)
-	if err != nil {
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
-
-	if record.Traits.IsAnonymousProxy {
-		verbose("Anonymous IP detected")
-		ciso = "A1"
-		cname = "Anonymous Proxy"
-	} else {
+	if strings.Contains(mmdb, "City.mmdb") {
+		record, err := db.City(ip)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
 		ciso = record.Country.IsoCode
 		cname = record.Country.Names["en"]
-	}
-
-	if country || iso {
-		if iso && ciso != "" {
+		cityName = record.City.Names["en"]
+		if len(record.Subdivisions) > 0 {
+			subdivisionName = record.Subdivisions[0].Names["en"]
+		}
+		if cityName != "" {
+			output = append(output, cityName)
+		}
+		if subdivisionName != "" {
+			output = append(output, subdivisionName)
+		}
+		if ciso != "" {
 			output = append(output, ciso)
 		}
-		if country && cname != "" {
+		if cname != "" {
 			output = append(output, cname)
 		}
 		response = strings.Join(output, ", ")
 	} else {
-		if ciso == "" {
-			response = "GeoIP Country Edition: IP Address not found"
+		record, err := db.Country(ip)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+		if record.Traits.IsAnonymousProxy {
+			verbose("Anonymous IP detected")
+			ciso = "A1"
+			cname = "Anonymous Proxy"
 		} else {
-			response = fmt.Sprintf("GeoIP Country Edition: %s, %s", ciso, cname)
+			ciso = record.Country.IsoCode
+			cname = record.Country.Names["en"]
+		}
+		if country || iso {
+			if iso && ciso != "" {
+				output = append(output, ciso)
+			}
+			if country && cname != "" {
+				output = append(output, cname)
+			}
+			response = strings.Join(output, ", ")
+		} else {
+			if ciso == "" {
+				response = "GeoIP Country Edition: IP Address not found"
+			} else {
+				response = fmt.Sprintf("GeoIP Country Edition: %s, %s", ciso, cname)
+			}
 		}
 	}
 
