@@ -279,3 +279,54 @@ func extractDatabaseFileCity(dst string, tarGz string) error {
 	re, _ := regexp.Compile(`GeoLite2\-City\.mmdb$`)
 
 	r, err := os.Open(tarGz)
+	if err != nil {
+		return err
+	}
+	gzr, err := gzip.NewReader(r)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = gzr.Close() }()
+	tr := tar.NewReader(gzr)
+	for {
+		header, err := tr.Next()
+		switch {
+		case err == io.EOF:
+			return nil
+		case err != nil:
+			return err
+		case header == nil:
+			continue
+		}
+		target := filepath.Join(dst, header.Name)
+		switch header.Typeflag {
+		case tar.TypeReg:
+			if re.Match([]byte(target)) {
+				outFile := filepath.Join(dst, "GeoLite2-City.mmdb")
+				tmpFile, err := os.CreateTemp("", "testDBFile")
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer func() { _ = os.Remove(tmpFile.Name()) }()
+				verbose(fmt.Sprintf("Copy GeoLite2-City.mmdb to %s for testing", tmpFile.Name()))
+				if _, err := io.Copy(tmpFile, tr); err != nil {
+					return err
+				}
+				db, err := geoip2.Open(tmpFile.Name())
+				if err != nil {
+					return fmt.Errorf("downloaded GeoLite2-City.mmdb database (%s) corrupt, aborting updating", tmpFile.Name())
+				}
+				_ = db.Close()
+				verbose(fmt.Sprintf("Copy %s to %s", tmpFile.Name(), outFile))
+				input, err := os.ReadFile(tmpFile.Name())
+				if err != nil {
+					return err
+				}
+				err = os.WriteFile(outFile, input, 0644)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+}

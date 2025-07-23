@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+- Add support for GeoLite2-City.mmdb database (city-level lookups)
+- Add `db-update-city` command to update the City database
+- Help output and documentation updated for City support
+
 ## [0.3.0]
 
 - Only download database update if missing locally or update is newer than local database

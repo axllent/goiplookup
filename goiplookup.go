@@ -77,7 +77,7 @@ func main() {
 
 // ShowUsage prints the help function
 var showUsage = func() {
-	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>\n", os.Args[0])
+	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|db-update-city|self-update>\n", os.Args[0])
 	fmt.Println("\nGoiplookup uses the GeoLite2-Country or GeoLite2-City database to find the Country or City that an IP address or hostname originates from.")
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
