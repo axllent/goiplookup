@@ -329,4 +329,10 @@ func extractDatabaseFileCity(dst string, tarGz string) error {
 			}
 		}
 	}
+
+	if !isFile(path.Join(dst, "GeoLite2-City.mmdb")) {
+		fmt.Println("GeoLite2-City.mmdb was not found after extraction. Please check your license key and try again.")
+	}
+
+	return nil
 }

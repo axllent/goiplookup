@@ -27,7 +27,7 @@ If you wish to replace an existing defunct implementation of geoiplookup, then s
 ## Basic usage
 
 ```
-Usage: goiplookup [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|self-update>
+Usage: goiplookup [-i] [-c] [-d <database directory>] [-f <file>] <ipaddress|hostname|db-update|db-update-city|self-update>
 
 Options:
   -V	show version number
@@ -37,16 +37,20 @@ Options:
   -h	show help
   -i	return country iso code
   -v	verbose/debug output
+  -f	file containing IPs (one per line) for batch lookup
 
 Examples:
 goiplookup 8.8.8.8               Return the country/city ISO code and name
 goiplookup -d ~/GeoIP 8.8.8.8    Use a different database directory
 goiplookup -i 8.8.8.8            Return just the country ISO code
 goiplookup -c 8.8.8.8            Return just the country name
+goiplookup -f ips.txt            Lookup a batch of IPs from a file, output JSON per line
 goiplookup db-update             Update the GeoLite2-Country database (do not run more than once a month)
 goiplookup db-update-city        Update the GeoLite2-City database (do not run more than once a month)
 goiplookup self-update           Update the GoIpLookup binary with the latest release
 ```
+
+Batch lookups will output one JSON result per line for each IP in the file.
 
 If the GeoLite2-City database is present, output will include city and subdivision information.
 

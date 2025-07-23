@@ -2,8 +2,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/axllent/ghru"
 	flag "github.com/spf13/pflag"
@@ -18,6 +20,7 @@ var (
 	showVersion   bool
 	dataDir       string
 	licenseKey    string // GeoLite2 license key for updating
+	batchFile     string // file containing batch IPs
 	version       = "dev"
 )
 
@@ -30,6 +33,7 @@ func main() {
 		p = "/usr/local/share/GeoIP"
 	}
 	flag.StringVarP(&dataDir, "dir", "d", p, "database directory or file")
+	flag.StringVarP(&batchFile, "file", "f", "", "file containing IPs (one per line)")
 
 	flag.BoolVarP(&country, "country", "c", false, "return country name")
 	flag.BoolVarP(&iso, "iso", "i", false, "return country iso code")
@@ -40,14 +44,24 @@ func main() {
 	// parse flags
 	flag.Parse()
 
-	if showVersion {
-		fmt.Printf("Version %s\n", version)
-
-		latest, _, _, err := ghru.Latest("axllent/goiplookup", "goiplookup")
-		if err == nil && ghru.GreaterThan(latest, version) {
-			fmt.Printf("Update available: %s\nRun `%s self-update` to update\n", latest, os.Args[0])
+	if batchFile != "" {
+		file, err := os.Open(batchFile)
+		if err != nil {
+			fmt.Println("Error opening batch file:", err)
+			os.Exit(1)
 		}
-		os.Exit(0)
+		defer file.Close()
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			ip := strings.TrimSpace(scanner.Text())
+			if ip != "" {
+				lookupAddr(ip)
+			}
+		}
+		if err := scanner.Err(); err != nil {
+			fmt.Println("Error reading batch file:", err)
+		}
+		return
 	}
 
 	if len(flag.Args()) != 1 || showHelp {
@@ -77,7 +91,7 @@ func main() {
 
 // ShowUsage prints the help function
 var showUsage = func() {
-	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] <ipaddress|hostname|db-update|db-update-city|self-update>\n", os.Args[0])
+	fmt.Printf("Usage: %s [-i] [-c] [-d <database directory>] [-f <file>] <ipaddress|hostname|db-update|db-update-city|self-update>\n", os.Args[0])
 	fmt.Println("\nGoiplookup uses the GeoLite2-Country or GeoLite2-City database to find the Country or City that an IP address or hostname originates from.")
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
@@ -86,6 +100,7 @@ var showUsage = func() {
 	fmt.Printf("%s -d ~/GeoIP 8.8.8.8    # Use a different database directory\n", os.Args[0])
 	fmt.Printf("%s -i 8.8.8.8            # Return just the country ISO code\n", os.Args[0])
 	fmt.Printf("%s -c 8.8.8.8            # Return just the country name\n", os.Args[0])
+	fmt.Printf("%s -f ips.txt            # Lookup a batch of IPs from a file, output JSON per line\n", os.Args[0])
 	fmt.Printf("%s db-update             # Update the GeoLite2-Country database (do not run more than once a month)\n", os.Args[0])
 	fmt.Printf("%s db-update-city        # Update the GeoLite2-City database (do not run more than once a month)\n", os.Args[0])
 	fmt.Printf("%s self-update           # Update the GoIpLookup binary with the latest release\n", os.Args[0])

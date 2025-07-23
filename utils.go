@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net"
@@ -46,7 +47,39 @@ func lookupAddr(lookup string) {
 	case mode.IsDir(): // if dataDir is dir, try City then Country
 		cityPath := path.Join(dataDir, "GeoLite2-City.mmdb")
 		countryPath := path.Join(dataDir, "GeoLite2-Country.mmdb")
-		if isFile(cityPath) {
+		cityExists := isFile(cityPath)
+		countryExists := isFile(countryPath)
+		if !cityExists && !countryExists {
+			fmt.Printf("Error: No GeoLite2-City.mmdb or GeoLite2-Country.mmdb found in %s\n", dataDir)
+			os.Exit(1)
+		}
+		if cityExists && countryExists {
+			dbCity, err := geoip2.Open(cityPath)
+			if err != nil {
+				fmt.Println("Error opening City database:", err)
+			} else {
+				defer func() { _ = dbCity.Close() }()
+				ip := net.ParseIP(ipraw)
+				record, err := dbCity.City(ip)
+				if err != nil {
+					fmt.Println("Error:", err)
+				} else {
+					cityName = record.City.Names["en"]
+					countryName := record.Country.Names["en"]
+					result := map[string]interface{}{
+						"ip": ipraw,
+						"location": map[string]string{
+							"city":    cityName,
+							"country": countryName,
+						},
+					}
+					jsonBytes, _ := json.MarshalIndent(result, "", "  ")
+					fmt.Println(string(jsonBytes))
+				}
+			}
+			return
+		}
+		if cityExists {
 			mmdb = cityPath
 		} else {
 			mmdb = countryPath
@@ -122,6 +155,9 @@ func lookupAddr(lookup string) {
 		}
 	}
 
+	if strings.TrimSpace(response) == "" {
+		response = "GeoIP Country Edition: IP Address not found"
+	}
 	fmt.Println(response)
 }
 
