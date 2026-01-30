@@ -7,23 +7,20 @@ written in [Go](https://golang.org/).
 
 It currently only supports the free GeoLite2-Country database, and there is no planned support for the other types.
 
-
 ## Features
 
-- Drop-in replacement for the now defunct `geoiplookup` utility, simply rename it
-- Works with the current MaxMind database format (mmdd)
-- IPv4, IPv6 and fully qualified domain name (FQDN) support
-- Options to return just the country iso (`NZ`) or country name (`New Zealand`), rather than the full `GeoIP Country Edition: NZ, New Zealand`
-- Built-in database update support (see [Database updates](#database-updates))
-- Built-in self updater (if new release is available)
-
+-   Drop-in replacement for the now defunct `geoiplookup` utility, simply rename it
+-   Works with the current MaxMind database format (mmdd)
+-   IPv4, IPv6 and fully qualified domain name (FQDN) support
+-   Options to return just the country iso (`NZ`) or country name (`New Zealand`), rather than the full `GeoIP Country Edition: NZ, New Zealand`
+-   Built-in database update support (see [Database updates](#database-updates))
+-   Built-in self updater (if new release is available)
 
 ## Installing
 
 Multiple OS/Architecture binaries are supplied with releases. Extract the binary, make it executable, and move it to a location such as `/usr/local/bin`.
 
 If you wish to replace an existing defunct implementation of geoiplookup, then simply name the file `geoiplookup`.
-
 
 ## Basic usage
 
@@ -48,7 +45,6 @@ goiplookup db-update			Update the GeoLite2-Country database (do not run more tha
 goiplookup self-update			Update the GoIpLookup binary with the latest release
 ```
 
-
 ## GoIPLookup updates
 
 GoIPLookup comes with a built-in self-updater:
@@ -59,18 +55,15 @@ goiplookup self-update
 
 Version checked (`goiplookup -V`) will tell you if your version is out of date.
 
-
 ## Database updates
 
 GoIPLookup is able to update your GeoLite2 Country database. As of 01/01/2020 MaxMind require a (free) License Key in order to download these updates. The release (binary) versions of goiplookup (>= 0.2.2) already contain a key for this, however if you are compiling from source you will need to set your own licence key in your environment (see below).
-
 
 ### Binary release database updates
 
 ```
 goiplookup db-update
 ```
-
 
 ### Self-compiled database updates
 
@@ -80,21 +73,24 @@ To generate your own license key from MaxMind you must first [register a free ac
 ```
 LICENSEKEY="xxxxxxxx" goiplookup db-update
 ```
+
 or
+
 ```
 export LICENSEKEY="xxxxxxxx"
 goiplookup db-update
 ```
 
 or if you wish to compile the source code yourself with your key:
+
 ```
 make LICENSEKEY="xxxxxxxx"
 ```
 
 ## Compiling from source
 
-Go >= 1.11 required:
+Go >= 1.23 required:
 
 ```
-go get github.com/axllent/goiplookup
+go install github.com/axllent/goiplookup@latest
 ```

@@ -21,11 +21,6 @@ var (
 	version       = "dev"
 )
 
-// URLs
-const (
-	releaseURL = "https://api.github.com/repos/axllent/goiplookup/releases/latest"
-)
-
 // Main function
 func main() {
 
@@ -46,7 +41,7 @@ func main() {
 	flag.Parse()
 
 	if showVersion {
-		fmt.Println(fmt.Sprintf("Version %s", version))
+		fmt.Printf("Version %s\n", version)
 
 		latest, _, _, err := ghru.Latest("axllent/goiplookup", "goiplookup")
 		if err == nil && ghru.GreaterThan(latest, version) {
@@ -62,20 +57,22 @@ func main() {
 
 	lookup := flag.Args()[0]
 
-	if lookup == "db-update" {
+	switch lookup {
+	case "db-update":
 		// update database
-		UpdateGeoLite2Country()
-	} else if lookup == "self-update" {
+		updateGeoLite2Country()
+	case "self-update":
 		// update app if needed
 		rel, err := ghru.Update("axllent/goiplookup", "goiplookup", version)
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
+			os.Exit(1)
 		}
 		fmt.Printf("Updated %s to version %s\n", os.Args[0], rel)
 		os.Exit(0)
-	} else {
+	default:
 		// lookup ip/hostname
-		Lookup(lookup)
+		lookupAddr(lookup)
 	}
 }
 

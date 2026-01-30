@@ -18,7 +18,7 @@ import (
 )
 
 // UpdateGeoLite2Country updates GeoLite2-Country.mmdb
-func UpdateGeoLite2Country() {
+func updateGeoLite2Country() {
 
 	key := os.Getenv("LICENSEKEY")
 	if key == "" && licenseKey != "" {
@@ -39,18 +39,21 @@ func UpdateGeoLite2Country() {
 	}
 
 	if !updateRequired {
-		Verbose("No database update available")
+		verbose("No database update available")
 		os.Exit(0)
 	}
 
-	Verbose("Updating GeoLite2-Country.mmdb")
+	verbose("Updating GeoLite2-Country.mmdb")
 
 	tmpDir := os.TempDir()
 	gzFile := filepath.Join(tmpDir, "GeoLite2-Country.tar.gz")
 
 	// check the output directory is writeable
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		os.MkdirAll(dataDir, os.ModePerm)
+		if err := os.MkdirAll(dataDir, os.ModePerm); err != nil {
+			fmt.Println("Error: Cannot create", dataDir)
+			os.Exit(1)
+		}
 	}
 
 	if _, err := os.Stat(dataDir); err != nil {
@@ -58,12 +61,12 @@ func UpdateGeoLite2Country() {
 		os.Exit(1)
 	}
 
-	if err := DownloadToFile(gzFile, dbUpdateURL); err != nil {
+	if err := downloadToFile(gzFile, dbUpdateURL); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := ExtractDatabaseFile(dataDir, gzFile); err != nil {
+	if err := extractDatabaseFile(dataDir, gzFile); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -107,18 +110,18 @@ func requiresDBUpdate(updateURL string) (bool, error) {
 	return lastModifiedRemote.After(lastModifiedLocal), nil
 }
 
-func getLastModifiedFromHeader(h string) time.Time {
-	var t time.Time
-	if h == "" {
-		return t
-	}
-	t, _ = time.Parse(time.RFC1123, h)
-	return t
-}
+// func getLastModifiedFromHeader(h string) time.Time {
+// 	var t time.Time
+// 	if h == "" {
+// 		return t
+// 	}
+// 	t, _ = time.Parse(time.RFC1123, h)
+// 	return t
+// }
 
 // ExtractDatabaseFile extracts just the GeoLite2-Country.mmdb from the tar.gz
-func ExtractDatabaseFile(dst string, tarGz string) error {
-	Verbose(fmt.Sprintf("Opening %s", tarGz))
+func extractDatabaseFile(dst string, tarGz string) error {
+	verbose(fmt.Sprintf("Opening %s", tarGz))
 
 	re, _ := regexp.Compile(`GeoLite2\-Country\.mmdb$`)
 
@@ -131,7 +134,7 @@ func ExtractDatabaseFile(dst string, tarGz string) error {
 	if err != nil {
 		return err
 	}
-	defer gzr.Close()
+	defer func() { _ = gzr.Close() }()
 
 	tr := tar.NewReader(gzr)
 
@@ -166,20 +169,20 @@ func ExtractDatabaseFile(dst string, tarGz string) error {
 				if err != nil {
 					log.Fatal(err)
 				}
-				defer os.Remove(tmpFile.Name()) // clean up
+				defer func() { _ = os.Remove(tmpFile.Name()) /* clean up*/ }()
 
-				Verbose(fmt.Sprintf("Copy GeoLite2-Country.mmdb to %s for testing", tmpFile.Name()))
+				verbose(fmt.Sprintf("Copy GeoLite2-Country.mmdb to %s for testing", tmpFile.Name()))
 				if _, err := io.Copy(tmpFile, tr); err != nil {
 					return err
 				}
 
 				db, err := geoip2.Open(tmpFile.Name())
 				if err != nil {
-					return fmt.Errorf("Downloaded GeoLite2-Country.mmdb database (%s) corrupt, aborting updating", tmpFile.Name())
+					return fmt.Errorf("downloaded GeoLite2-Country.mmdb database (%s) corrupt, aborting updating", tmpFile.Name())
 				}
-				db.Close()
+				_ = db.Close()
 
-				Verbose(fmt.Sprintf("Copy %s to %s", tmpFile.Name(), outFile))
+				verbose(fmt.Sprintf("Copy %s to %s", tmpFile.Name(), outFile))
 
 				input, err := os.ReadFile(tmpFile.Name())
 				if err != nil {
