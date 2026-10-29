@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.3]
+
+- Update Go dependencies
+
 ## [0.3.2]
 
 - Update Go dependencies
